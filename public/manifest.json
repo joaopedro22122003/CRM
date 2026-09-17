@@ -1,0 +1,16 @@
+{
+  "name": "Garagem do Jota",
+  "short_name": "Garagem do Jota",
+  "description": "CRM da Garagem do Jota — clientes, orçamentos, marcações e serviços",
+  "start_url": "/pedidos",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#1c1917",
+  "lang": "pt-PT",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
