@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_NAME, tokenSessaoEsperado } from "./lib/auth";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const esperado = await tokenSessaoEsperado();
 
   // Sem APP_PASSWORD configurada ainda não há como validar — deixa
