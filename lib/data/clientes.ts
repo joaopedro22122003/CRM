@@ -74,3 +74,12 @@ export async function atualizarCliente(id: string, dados: DadosCliente): Promise
     .eq("id", id);
   if (error) throw error;
 }
+
+/** Apaga o cliente e, em cascata (definido na base de dados), tudo o
+ * que está ligado a ele: viaturas, pedidos, orçamentos, marcações,
+ * serviços e faturação. Ação permanente. */
+export async function apagarCliente(id: string): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase.from("clientes").delete().eq("id", id);
+  if (error) throw error;
+}

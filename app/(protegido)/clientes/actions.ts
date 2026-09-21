@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { criarCliente, atualizarCliente } from "@/lib/data/clientes";
+import { criarCliente, atualizarCliente, apagarCliente } from "@/lib/data/clientes";
 import { criarViatura, atualizarViatura } from "@/lib/data/viaturas";
 import type { Fonte, MaterialBancos } from "@/lib/types";
 
@@ -58,4 +58,14 @@ export async function guardarViatura(_estado: EstadoFormulario, formData: FormDa
 
   revalidatePath(`/clientes/${clienteId}`);
   redirect(`/clientes/${clienteId}`);
+}
+
+export async function apagarClienteAction(formData: FormData): Promise<void> {
+  const clienteId = String(formData.get("cliente_id") ?? "");
+  if (!clienteId) return;
+
+  await apagarCliente(clienteId);
+
+  revalidatePath("/clientes");
+  redirect("/clientes");
 }

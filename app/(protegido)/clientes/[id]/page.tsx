@@ -5,6 +5,7 @@ import { obterClienteComDetalhe } from "@/lib/data/clientes";
 import { ROTULOS_FONTE, ROTULOS_MATERIAL_BANCOS } from "@/lib/types";
 import { formatarEuros } from "@/lib/pricing";
 import { linkWhatsApp } from "@/lib/whatsapp";
+import BotaoApagarCliente from "../BotaoApagarCliente";
 
 export default async function ClienteDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -109,6 +110,8 @@ export default async function ClienteDetalhePage({ params }: { params: Promise<{
             </ul>
           )}
         </section>
+
+        <BotaoApagarCliente clienteId={cliente.id} nome={cliente.nome} />
       </div>
     </>
   );
