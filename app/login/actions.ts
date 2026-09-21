@@ -8,7 +8,6 @@ export type EstadoLogin = { erro?: string };
 
 export async function entrar(_estado: EstadoLogin, formData: FormData): Promise<EstadoLogin> {
   const password = String(formData.get("password") || "");
-  const proximo = String(formData.get("proximo") || "/pedidos");
 
   const esperado = await tokenSessaoEsperado();
   if (!esperado) {
@@ -29,5 +28,5 @@ export async function entrar(_estado: EstadoLogin, formData: FormData): Promise<
     maxAge: 60 * 60 * 24 * 365,
   });
 
-  redirect(proximo.startsWith("/") ? proximo : "/pedidos");
+  redirect("/pedidos");
 }

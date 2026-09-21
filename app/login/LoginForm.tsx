@@ -5,12 +5,11 @@ import { entrar, type EstadoLogin } from "./actions";
 
 const ESTADO_INICIAL: EstadoLogin = {};
 
-export default function LoginForm({ proximo }: { proximo: string }) {
+export default function LoginForm() {
   const [estado, formAction, aPendente] = useActionState(entrar, ESTADO_INICIAL);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <input type="hidden" name="proximo" value={proximo} />
       <div className="flex flex-col gap-2">
         <label htmlFor="password" className="text-sm font-medium text-neutral-700">
           Palavra-passe
