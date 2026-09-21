@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import { guardarOrcamento, type EstadoFormulario } from "./actions";
 import { Botao, Campo, Textarea } from "@/components/ui";
-import { calcularPrecoOrcamento, materialParaTier, precosInvertidos, formatarEuros, type ExtraOrcamento } from "@/lib/pricing";
-import { ROTULOS_MATERIAL_BANCOS, type ConfiguracaoPrecos, type MaterialBancos, type Pacote } from "@/lib/types";
+import { calcularPrecoOrcamento, materialParaTier, precosInvertidos, formatarEuros } from "@/lib/pricing";
+import { ROTULOS_MATERIAL_BANCOS, type ConfiguracaoPrecos, type ExtraCatalogo, type MaterialBancos, type Pacote } from "@/lib/types";
 
 const ESTADO_INICIAL: EstadoFormulario = {};
 
@@ -19,22 +19,30 @@ export default function OrcamentoForm({
   pedidoId,
   materialBancos,
   precos,
+  extrasCatalogo,
 }: {
   pedidoId: string;
   materialBancos: MaterialBancos | null;
   precos: ConfiguracaoPrecos;
+  extrasCatalogo: ExtraCatalogo[];
 }) {
   const [estado, formAction, aPendente] = useActionState(guardarOrcamento, ESTADO_INICIAL);
 
   const [pacote, setPacote] = useState<Pacote>("inicial");
   const [temEstofos, setTemEstofos] = useState(false);
-  const [extras, setExtras] = useState<ExtraOrcamento[]>([]);
-  const [novaDescricao, setNovaDescricao] = useState("");
-  const [novoPreco, setNovoPreco] = useState("");
+  const [extrasSelecionados, setExtrasSelecionados] = useState<Set<string>>(new Set());
 
   const materialTier = materialBancos ? materialParaTier(materialBancos) : null;
   const estofosDisponiveis = materialTier !== null;
   const avisoPrecos = precosInvertidos(precos);
+
+  const extras = useMemo(
+    () =>
+      extrasCatalogo
+        .filter((extra) => extrasSelecionados.has(extra.id))
+        .map((extra) => ({ descricao: extra.descricao, preco: Number(extra.preco) })),
+    [extrasCatalogo, extrasSelecionados]
+  );
 
   const resultado = useMemo(
     () =>
@@ -48,17 +56,13 @@ export default function OrcamentoForm({
     [pacote, temEstofos, estofosDisponiveis, materialTier, extras, precos]
   );
 
-  function adicionarExtra() {
-    const descricao = novaDescricao.trim();
-    const preco = Number(novoPreco);
-    if (!descricao || Number.isNaN(preco)) return;
-    setExtras((atual) => [...atual, { descricao, preco }]);
-    setNovaDescricao("");
-    setNovoPreco("");
-  }
-
-  function removerExtra(indice: number) {
-    setExtras((atual) => atual.filter((_, i) => i !== indice));
+  function alternarExtra(id: string) {
+    setExtrasSelecionados((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(id)) novo.delete(id);
+      else novo.add(id);
+      return novo;
+    });
   }
 
   return (
@@ -134,51 +138,38 @@ export default function OrcamentoForm({
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-700">Extras (opcional)</span>
-        {extras.length > 0 && (
-          <ul className="flex flex-col gap-1.5">
-            {extras.map((extra, indice) => (
-              <li key={indice} className="flex items-center justify-between rounded-lg bg-neutral-100 px-3 py-2 text-sm">
-                <span>{extra.descricao}</span>
-                <span className="flex items-center gap-2">
-                  <span className="font-medium">{formatarEuros(extra.preco)}</span>
-                  <button
-                    type="button"
-                    onClick={() => removerExtra(indice)}
-                    aria-label="Remover extra"
-                    className="text-neutral-400"
-                  >
-                    ✕
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
+        {extrasCatalogo.length === 0 ? (
+          <p className="text-xs text-neutral-500">
+            Sem extras no catálogo. Podes adicionar na tabela &quot;extras_catalogo&quot; do Supabase.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {extrasCatalogo.map((extra) => {
+              const selecionado = extrasSelecionados.has(extra.id);
+              return (
+                <label
+                  key={extra.id}
+                  className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 ${
+                    selecionado ? "border-neutral-900 bg-neutral-50" : "border-neutral-200"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selecionado}
+                      onChange={() => alternarExtra(extra.id)}
+                      className="h-4 w-4"
+                    />
+                    <span className="font-medium text-neutral-900">{extra.descricao}</span>
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold text-neutral-700">
+                    {formatarEuros(Number(extra.preco))}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         )}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={novaDescricao}
-            onChange={(e) => setNovaDescricao(e.target.value)}
-            placeholder="Descrição (ex.: descontaminação)"
-            className="flex-1 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm focus:border-neutral-900 focus:outline-none"
-          />
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.01"
-            value={novoPreco}
-            onChange={(e) => setNovoPreco(e.target.value)}
-            placeholder="€"
-            className="w-20 rounded-xl border border-neutral-300 px-3 py-2.5 text-sm focus:border-neutral-900 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={adicionarExtra}
-            className="shrink-0 rounded-xl bg-neutral-100 px-3 py-2.5 text-sm font-semibold text-neutral-700"
-          >
-            + Add
-          </button>
-        </div>
       </div>
 
       <Campo label="Notas de variação esperada (opcional)">

@@ -89,6 +89,14 @@ export interface OrcamentoExtra {
   preco: number;
 }
 
+export interface ExtraCatalogo {
+  id: string;
+  descricao: string;
+  preco: number;
+  ativo: boolean;
+  ordem: number;
+}
+
 export interface Marcacao {
   id: string;
   pedido_id: string;
