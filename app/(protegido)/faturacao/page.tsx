@@ -32,6 +32,13 @@ export default async function FaturacaoPage() {
                     <p className="text-sm text-neutral-500">
                       {new Date(r.servico.data_conclusao).toLocaleDateString("pt-PT")} · {formatarEuros(Number(r.valor))}
                     </p>
+                    {r.orcamento && (
+                      <p className="truncate text-xs text-neutral-400">
+                        {r.orcamento.pacote}
+                        {r.orcamento.temEstofos && " + Estofos"}
+                        {r.orcamento.extras.length > 0 && ` · ${r.orcamento.extras.join(", ")}`}
+                      </p>
+                    )}
                   </Link>
                   {r.estado === "pago" ? (
                     <Badge cor="verde">Pago</Badge>
