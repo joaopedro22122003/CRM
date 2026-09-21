@@ -14,7 +14,9 @@ export type EstadoPedido =
 
 export type Pacote = "inicial" | "detalhe" | "completo";
 
-export type EstofosMaterial = "pele_sintetico" | "tecido_alcantara";
+/** O preço dos estofos é único; este campo só regista qual foi o
+ * material limpo, para efeitos de histórico. */
+export type EstofosMaterial = "pele" | "sintetico" | "tecido" | "alcantara";
 
 export type TipoMarcacao = "cliente_traz" | "recolha_entrega";
 
@@ -50,8 +52,7 @@ export interface ConfiguracaoPrecos {
   preco_inicial: number;
   preco_detalhe: number;
   preco_completo: number;
-  preco_pele_sintetico: number;
-  preco_tecido_alcantara: number;
+  preco_estofos: number;
   desconto_combo: number;
   updated_at: string;
 }
@@ -164,11 +165,6 @@ export const ROTULOS_MATERIAL_BANCOS: Record<MaterialBancos, string> = {
   tecido: "Tecido",
   alcantara: "Alcântara",
   por_definir: "Por definir",
-};
-
-export const ROTULOS_ESTOFOS_MATERIAL: Record<EstofosMaterial, string> = {
-  pele_sintetico: "Pele / Sintético",
-  tecido_alcantara: "Tecido / Alcântara",
 };
 
 export const ROTULOS_FONTE: Record<Fonte, string> = {

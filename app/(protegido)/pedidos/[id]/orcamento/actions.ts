@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import { obterPedidoComDetalhe } from "@/lib/data/pedidos";
 import { obterConfiguracaoPrecos } from "@/lib/data/precos";
 import { criarOrcamento } from "@/lib/data/orcamentos";
-import { calcularPrecoOrcamento, materialParaTier, type ExtraOrcamento } from "@/lib/pricing";
-import type { Pacote } from "@/lib/types";
+import { calcularPrecoOrcamento, materialDefinido, type ExtraOrcamento } from "@/lib/pricing";
+import type { EstofosMaterial, Pacote } from "@/lib/types";
 
 export type EstadoFormulario = { erro?: string };
 
@@ -39,8 +39,11 @@ export async function guardarOrcamento(_estado: EstadoFormulario, formData: Form
 
   // Regra inegociável: só se pode orçamentar estofos depois de o
   // material dos bancos da viatura estar definido.
-  const materialTier = detalhe.viatura ? materialParaTier(detalhe.viatura.material_bancos) : null;
-  if (temEstofos && !materialTier) {
+  const materialViatura = detalhe.viatura?.material_bancos ?? null;
+  const estofosMaterial: EstofosMaterial | null =
+    materialViatura && materialDefinido(materialViatura) ? (materialViatura as EstofosMaterial) : null;
+
+  if (temEstofos && !estofosMaterial) {
     return {
       erro:
         "Para orçamentar limpeza de estofos é preciso primeiro definir o material dos bancos na ficha da viatura.",
@@ -49,19 +52,13 @@ export async function guardarOrcamento(_estado: EstadoFormulario, formData: Form
 
   const precos = await obterConfiguracaoPrecos();
 
-  const resultado = calcularPrecoOrcamento({
-    pacote,
-    temEstofos,
-    estofosMaterial: temEstofos ? materialTier : null,
-    extras,
-    precos,
-  });
+  const resultado = calcularPrecoOrcamento({ pacote, temEstofos, extras, precos });
 
   await criarOrcamento({
     pedidoId,
     pacote,
     temEstofos,
-    estofosMaterial: temEstofos ? materialTier : null,
+    estofosMaterial: temEstofos ? estofosMaterial : null,
     extras,
     notasVariacao,
     resultado,

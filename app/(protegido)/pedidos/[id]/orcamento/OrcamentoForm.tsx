@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import { guardarOrcamento, type EstadoFormulario } from "./actions";
 import { Botao, Campo, Textarea } from "@/components/ui";
-import { calcularPrecoOrcamento, materialParaTier, precosInvertidos, formatarEuros } from "@/lib/pricing";
+import { calcularPrecoOrcamento, materialDefinido, formatarEuros } from "@/lib/pricing";
 import { ROTULOS_MATERIAL_BANCOS, type ConfiguracaoPrecos, type ExtraCatalogo, type MaterialBancos, type Pacote } from "@/lib/types";
 
 const ESTADO_INICIAL: EstadoFormulario = {};
@@ -32,9 +32,7 @@ export default function OrcamentoForm({
   const [temEstofos, setTemEstofos] = useState(false);
   const [extrasSelecionados, setExtrasSelecionados] = useState<Set<string>>(new Set());
 
-  const materialTier = materialBancos ? materialParaTier(materialBancos) : null;
-  const estofosDisponiveis = materialTier !== null;
-  const avisoPrecos = precosInvertidos(precos);
+  const estofosDisponiveis = materialBancos !== null && materialDefinido(materialBancos);
 
   const extras = useMemo(
     () =>
@@ -49,11 +47,10 @@ export default function OrcamentoForm({
       calcularPrecoOrcamento({
         pacote,
         temEstofos: temEstofos && estofosDisponiveis,
-        estofosMaterial: temEstofos && estofosDisponiveis ? materialTier : null,
         extras,
         precos,
       }),
-    [pacote, temEstofos, estofosDisponiveis, materialTier, extras, precos]
+    [pacote, temEstofos, estofosDisponiveis, extras, precos]
   );
 
   function alternarExtra(id: string) {
@@ -70,13 +67,6 @@ export default function OrcamentoForm({
       <input type="hidden" name="pedido_id" value={pedidoId} />
       <input type="hidden" name="pacote" value={pacote} />
       <input type="hidden" name="extras" value={JSON.stringify(extras)} readOnly />
-
-      {avisoPrecos && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Atenção: na tabela de preços, Tecido/Alcântara não está mais caro que Pele/Sintético. Corrige isto na
-          tabela de configuração de preços.
-        </p>
-      )}
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-700">Pacote</span>
