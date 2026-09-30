@@ -26,7 +26,7 @@ export default function BottomNav() {
               <Link
                 href={href}
                 className={`flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
-                  ativo ? "text-neutral-900" : "text-neutral-400"
+                  ativo ? "text-brand" : "text-neutral-400"
                 }`}
               >
                 <Icone ativo={ativo} />

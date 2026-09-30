@@ -27,9 +27,9 @@ export default async function PedidosPage() {
         titulo="Pedidos"
         acao={
           <Link
-            href="/pedidos/novo"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white"
-            aria-label="Novo pedido"
+            href="/marcacao-rapida"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"
+            aria-label="Nova marcação"
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2.2}>
               <path strokeLinecap="round" d="M12 5v14M5 12h14" />

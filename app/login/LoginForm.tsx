@@ -20,7 +20,7 @@ export default function LoginForm() {
           type="password"
           autoFocus
           required
-          className="w-full rounded-xl border border-neutral-300 px-4 py-3 text-lg focus:border-neutral-900 focus:outline-none"
+          className="w-full rounded-xl border border-neutral-300 px-4 py-3 text-lg focus:border-brand focus:outline-none"
         />
       </div>
 
@@ -31,7 +31,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={aPendente}
-        className="w-full rounded-xl bg-neutral-900 px-4 py-3 text-lg font-semibold text-white active:bg-neutral-700 disabled:opacity-50"
+        className="w-full rounded-xl bg-brand px-4 py-3 text-lg font-semibold text-white active:bg-brand-dark disabled:opacity-50"
       >
         {aPendente ? "A entrar…" : "Entrar"}
       </button>

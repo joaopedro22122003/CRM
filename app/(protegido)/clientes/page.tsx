@@ -18,7 +18,7 @@ export default async function ClientesPage({
         acao={
           <Link
             href="/clientes/novo"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white"
             aria-label="Novo cliente"
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2.2}>
@@ -35,7 +35,7 @@ export default async function ClientesPage({
             name="q"
             defaultValue={q}
             placeholder="Pesquisar por nome ou telemóvel…"
-            className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base focus:border-neutral-900 focus:outline-none"
+            className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base focus:border-brand focus:outline-none"
           />
         </form>
 

@@ -5,6 +5,17 @@
   --foreground: #1c1917;
 }
 
+/* Cores da marca Garagem do Jota, tiradas do logo. */
+@theme {
+  --color-brand-50: #e6f6f5;
+  --color-brand-100: #ccecea;
+  --color-brand-400: #14b3ae;
+  --color-brand: #00a29e;
+  --color-brand-600: #008a86;
+  --color-brand-dark: #00625f;
+  --color-brand-950: #0b2322;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

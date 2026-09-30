@@ -75,7 +75,7 @@ export default function OrcamentoForm({
             <label
               key={p.valor}
               className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 ${
-                pacote === p.valor ? "border-neutral-900 bg-neutral-50" : "border-neutral-200"
+                pacote === p.valor ? "border-brand bg-brand-50" : "border-neutral-200"
               }`}
             >
               <span className="flex items-center gap-3">
@@ -140,7 +140,7 @@ export default function OrcamentoForm({
                 <label
                   key={extra.id}
                   className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 ${
-                    selecionado ? "border-neutral-900 bg-neutral-50" : "border-neutral-200"
+                    selecionado ? "border-brand bg-brand-50" : "border-neutral-200"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -170,7 +170,7 @@ export default function OrcamentoForm({
         />
       </Campo>
 
-      <div className="flex flex-col gap-1.5 rounded-xl bg-neutral-900 px-4 py-4 text-white">
+      <div className="flex flex-col gap-1.5 rounded-xl bg-brand-950 px-4 py-4 text-white">
         <LinhaResumo rotulo="Pacote" valor={resultado.precoBase} />
         {resultado.precoEstofos > 0 && <LinhaResumo rotulo="Estofos" valor={resultado.precoEstofos} />}
         {resultado.comboAplicado && <LinhaResumo rotulo="Desconto combo" valor={-resultado.descontoCombo} />}

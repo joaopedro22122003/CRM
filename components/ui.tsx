@@ -38,7 +38,7 @@ export function Cartao({ children, className = "" }: { children: ReactNode; clas
 }
 
 const variantes = {
-  primario: "bg-neutral-900 text-white active:bg-neutral-700",
+  primario: "bg-brand text-white active:bg-brand-dark",
   secundario: "bg-neutral-100 text-neutral-900 active:bg-neutral-200",
   perigo: "bg-red-50 text-red-700 active:bg-red-100",
 };
@@ -70,17 +70,20 @@ export function Botao({
   className = "",
   type = "submit",
   disabled,
+  onClick,
 }: {
   children: ReactNode;
   variante?: keyof typeof variantes;
   className?: string;
   type?: "submit" | "button";
   disabled?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <button
       type={type}
       disabled={disabled}
+      onClick={onClick}
       className={`inline-flex items-center justify-center rounded-xl px-4 py-3 text-center text-base font-semibold disabled:opacity-50 ${variantes[variante]} ${className}`}
     >
       {children}
@@ -104,7 +107,7 @@ export function Campo({
 }
 
 const classesInput =
-  "w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none";
+  "w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base text-neutral-900 focus:border-brand focus:outline-none";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${classesInput} ${props.className ?? ""}`} />;
@@ -125,6 +128,7 @@ const coresBadge: Record<string, string> = {
   verde: "bg-green-50 text-green-700",
   vermelho: "bg-red-50 text-red-700",
   roxo: "bg-purple-50 text-purple-700",
+  marca: "bg-brand-50 text-brand-dark",
 };
 
 export function Badge({ cor = "cinza", children }: { cor?: keyof typeof coresBadge; children: ReactNode }) {

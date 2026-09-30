@@ -15,6 +15,23 @@ export async function listarClientes(pesquisa?: string): Promise<Cliente[]> {
   return data ?? [];
 }
 
+export interface ClienteComViaturas extends Cliente {
+  viaturas: Viatura[];
+}
+
+/** Lista todos os clientes já com as suas viaturas incluídas — usado
+ * pelo assistente de nova marcação, que corre todo no browser sem
+ * voltar a pedir dados ao servidor entre passos. */
+export async function listarClientesComViaturas(): Promise<ClienteComViaturas[]> {
+  const supabase = criarClienteSupabase();
+  const { data, error } = await supabase
+    .from("clientes")
+    .select("*, viaturas(*)")
+    .order("nome");
+  if (error) throw error;
+  return (data ?? []) as unknown as ClienteComViaturas[];
+}
+
 export async function obterCliente(id: string): Promise<Cliente | null> {
   const supabase = criarClienteSupabase();
   const { data, error } = await supabase.from("clientes").select("*").eq("id", id).maybeSingle();

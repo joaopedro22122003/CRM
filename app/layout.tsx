@@ -24,7 +24,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#1c1917",
+  themeColor: "#00a29e",
 };
 
 // A app lê sempre dados atuais da base de dados (clientes, pedidos,
