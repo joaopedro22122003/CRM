@@ -1,6 +1,7 @@
 import "server-only";
 import { criarClienteSupabase } from "@/lib/supabase/server";
 import type { Cliente, Faturacao, Pedido, Servico, ServicoFoto, TipoFoto, Viatura } from "@/lib/types";
+import { obterUltimoOrcamentoDoPedido, type ResumoOrcamento } from "@/lib/data/orcamentos";
 
 const BUCKET_FOTOS = "fotos-servicos";
 
@@ -27,6 +28,7 @@ export interface ServicoComDetalhe {
   viatura: Viatura;
   fotos: ServicoFoto[];
   faturacao: Faturacao | null;
+  orcamento: ResumoOrcamento | null;
 }
 
 export async function obterServicoComDetalhe(id: string): Promise<ServicoComDetalhe | null> {
@@ -46,14 +48,15 @@ export async function obterServicoComDetalhe(id: string): Promise<ServicoComDeta
     viatura: Viatura;
   };
 
-  const [{ data: fotos, error: erroFotos }, { data: faturacao, error: erroFat }] = await Promise.all([
+  const [{ data: fotos, error: erroFotos }, { data: faturacao, error: erroFat }, orcamento] = await Promise.all([
     supabase.from("servico_fotos").select("*").eq("servico_id", id).order("created_at"),
     supabase.from("faturacao").select("*").eq("servico_id", id).maybeSingle(),
+    obterUltimoOrcamentoDoPedido(pedido.id),
   ]);
   if (erroFotos) throw erroFotos;
   if (erroFat) throw erroFat;
 
-  return { servico: resto, pedido, cliente, viatura, fotos: fotos ?? [], faturacao: faturacao ?? null };
+  return { servico: resto, pedido, cliente, viatura, fotos: fotos ?? [], faturacao: faturacao ?? null, orcamento };
 }
 
 export interface DadosServico {

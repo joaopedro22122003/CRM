@@ -1,19 +1,14 @@
 import "server-only";
 import { criarClienteSupabase } from "@/lib/supabase/server";
-import type { Cliente, EstadoFaturacao, Faturacao, Servico } from "@/lib/types";
+import type { Cliente, EstadoFaturacao, Faturacao, Pacote, Servico } from "@/lib/types";
 import { ROTULOS_PACOTE } from "@/lib/types";
-
-export interface ResumoOrcamentoServico {
-  pacote: string;
-  temEstofos: boolean;
-  extras: string[];
-}
+import type { ResumoOrcamento } from "@/lib/data/orcamentos";
 
 export interface FaturacaoResumo extends Faturacao {
   servico: Pick<Servico, "id" | "data_conclusao"> & {
     cliente: Pick<Cliente, "id" | "nome">;
   };
-  orcamento: ResumoOrcamentoServico | null;
+  orcamento: ResumoOrcamento | null;
 }
 
 export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
@@ -28,7 +23,7 @@ export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
   const registos = (faturacao ?? []) as unknown as (FaturacaoResumo & { servico: { pedido_id: string } })[];
 
   const pedidoIds = [...new Set(registos.map((r) => r.servico.pedido_id))];
-  const mapaOrcamentos = new Map<string, ResumoOrcamentoServico>();
+  const mapaOrcamentos = new Map<string, ResumoOrcamento>();
 
   if (pedidoIds.length > 0) {
     const { data: orcamentos, error: erroOrc } = await supabase
@@ -43,7 +38,7 @@ export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
       // primeiro que encontramos para cada pedido é o orçamento atual.
       if (mapaOrcamentos.has(o.pedido_id)) continue;
       mapaOrcamentos.set(o.pedido_id, {
-        pacote: ROTULOS_PACOTE[o.pacote as keyof typeof ROTULOS_PACOTE] ?? o.pacote,
+        pacote: ROTULOS_PACOTE[o.pacote as Pacote] ?? o.pacote,
         temEstofos: o.tem_estofos,
         extras: (o.orcamento_extras ?? []).map((e: { descricao: string }) => e.descricao),
       });

@@ -10,7 +10,7 @@ export default async function ServicoDetalhePage({ params }: { params: Promise<{
   const detalhe = await obterServicoComDetalhe(id);
   if (!detalhe) notFound();
 
-  const { servico, cliente, viatura, fotos, faturacao } = detalhe;
+  const { servico, cliente, viatura, fotos, faturacao, orcamento } = detalhe;
   const margem = Number(servico.preco_final) - Number(servico.custo_produtos);
   const tempoTotal = (servico.tempo_execucao_min ?? 0) + (servico.tempo_deslocacao_min ?? 0);
   const lucroHora = tempoTotal > 0 ? margem / (tempoTotal / 60) : null;
@@ -30,6 +30,20 @@ export default async function ServicoDetalhePage({ params }: { params: Promise<{
           <p className="text-sm text-neutral-600">
             {viatura.marca} {viatura.modelo} · {new Date(servico.data_conclusao).toLocaleDateString("pt-PT")}
           </p>
+
+          {orcamento && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge cor="cinza">
+                {orcamento.pacote}
+                {orcamento.temEstofos && " + Estofos"}
+              </Badge>
+              {orcamento.extras.map((extra) => (
+                <Badge key={extra} cor="roxo">
+                  {extra}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           <div className="mt-2 grid grid-cols-2 gap-3 border-t border-neutral-100 pt-3 text-sm">
             <Linha rotulo="Preço final" valor={formatarEuros(Number(servico.preco_final))} />
