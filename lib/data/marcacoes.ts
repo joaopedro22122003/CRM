@@ -21,6 +21,19 @@ export async function listarMarcacoesEntre(inicioIso: string, fimIso: string): P
   return (data ?? []) as unknown as MarcacaoResumo[];
 }
 
+/** Todas as marcações, sem filtro de data — usada pelo calendário
+ * mensal e pelo assistente de nova marcação, que navegam entre meses
+ * inteiramente no browser sem voltar a pedir dados ao servidor. */
+export async function listarTodasMarcacoes(): Promise<MarcacaoResumo[]> {
+  const supabase = criarClienteSupabase();
+  const { data, error } = await supabase
+    .from("marcacoes")
+    .select("*, pedido:pedidos(id, cliente:clientes(id, nome, telefone), viatura:viaturas(id, marca, modelo))")
+    .order("data_hora");
+  if (error) throw error;
+  return (data ?? []) as unknown as MarcacaoResumo[];
+}
+
 export interface MarcacaoComDetalhe {
   marcacao: Marcacao;
   pedido: Pedido;

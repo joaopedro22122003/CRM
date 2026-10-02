@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { format, isSameDay } from "date-fns";
+import { pt } from "date-fns/locale";
 import { Botao, Campo, Cartao, Input, Select, Textarea } from "@/components/ui";
+import CalendarioMes from "@/components/CalendarioMes";
 import { calcularPrecoOrcamento, formatarEuros, materialDefinido } from "@/lib/pricing";
 import {
   ROTULOS_MATERIAL_BANCOS,
@@ -14,6 +17,7 @@ import {
 } from "@/lib/types";
 import { criarMarcacaoRapidaAction } from "./actions";
 import type { ClienteComViaturas } from "@/lib/data/clientes";
+import type { MarcacaoResumo } from "@/lib/data/marcacoes";
 
 const PASSOS = ["Cliente", "Viatura", "Orçamento", "Marcação", "Revisão"] as const;
 
@@ -23,14 +27,21 @@ const PACOTES: { valor: Pacote; rotulo: string }[] = [
   { valor: "completo", rotulo: "Completo" },
 ];
 
+const HORARIOS = [
+  "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
+  "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00",
+];
+
 export default function AssistenteMarcacao({
   clientes,
   precos,
   extrasCatalogo,
+  marcacoes,
 }: {
   clientes: ClienteComViaturas[];
   precos: ConfiguracaoPrecos;
   extrasCatalogo: ExtraCatalogo[];
+  marcacoes: MarcacaoResumo[];
 }) {
   const [passo, setPasso] = useState(1);
   const [erro, setErro] = useState<string | null>(null);
@@ -60,9 +71,9 @@ export default function AssistenteMarcacao({
   const [notasVariacao, setNotasVariacao] = useState("");
 
   // Passo 4 — marcação
-  const hoje = new Date().toISOString().slice(0, 10);
-  const [data, setData] = useState(hoje);
-  const [hora, setHora] = useState("09:00");
+  const [mesCalendario, setMesCalendario] = useState(new Date());
+  const [dataSelecionada, setDataSelecionada] = useState<Date | null>(null);
+  const [hora, setHora] = useState("");
   const [duracaoMin, setDuracaoMin] = useState(90);
   const [tipoMarcacao, setTipoMarcacao] = useState<TipoMarcacao>("cliente_traz");
   const [zona, setZona] = useState("");
@@ -120,7 +131,12 @@ export default function AssistenteMarcacao({
   const passo2Valido =
     modoViatura === "existente" ? viaturaId !== null : novaMarca.trim() !== "" && novoModelo.trim() !== "";
 
-  const passo4Valido = data !== "" && hora !== "" && (tipoMarcacao !== "recolha_entrega" || zona.trim() !== "");
+  const passo4Valido =
+    dataSelecionada !== null && hora !== "" && (tipoMarcacao !== "recolha_entrega" || zona.trim() !== "");
+
+  function contarMarcacoesNoDia(dia: Date): number {
+    return marcacoes.filter((m) => isSameDay(new Date(m.data_hora), dia)).length;
+  }
 
   function selecionarCliente(id: string) {
     setClienteId(id);
@@ -168,7 +184,7 @@ export default function AssistenteMarcacao({
       resumoProblema: resumoProblema.trim() || null,
       notasVariacao: notasVariacao.trim() || null,
       marcacao: {
-        data,
+        data: dataSelecionada ? format(dataSelecionada, "yyyy-MM-dd") : "",
         hora,
         duracaoMin,
         tipo: tipoMarcacao,
@@ -439,15 +455,36 @@ export default function AssistenteMarcacao({
 
       {passo === 4 && (
         <Cartao className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-neutral-900">Marcação</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Campo label="Data">
-              <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
-            </Campo>
-            <Campo label="Hora">
-              <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
-            </Campo>
+          <h2 className="text-base font-semibold text-neutral-900">Escolhe o dia</h2>
+          <CalendarioMes
+            mesAtual={mesCalendario}
+            onMudarMes={setMesCalendario}
+            diaSelecionado={dataSelecionada}
+            onSelecionarDia={(dia) => {
+              setDataSelecionada(dia);
+              setMesCalendario(dia);
+            }}
+            contarEventosNoDia={contarMarcacoesNoDia}
+          />
+
+          <div className="flex flex-col gap-2 border-t border-neutral-100 pt-4">
+            <span className="text-sm font-medium text-neutral-700">Hora</span>
+            <div className="grid grid-cols-3 gap-2">
+              {HORARIOS.map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  onClick={() => setHora(h)}
+                  className={`rounded-xl border px-2 py-2.5 text-sm font-medium ${
+                    hora === h ? "border-brand bg-brand-50 text-brand-dark" : "border-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {h}
+                </button>
+              ))}
+            </div>
           </div>
+
           <Campo label="Duração estimada (minutos)">
             <Input
               type="number"
@@ -499,7 +536,7 @@ export default function AssistenteMarcacao({
           <LinhaRevisao rotulo="Preço de entrada" valor={formatarEuros(resultado.precoEntrada)} />
           <LinhaRevisao
             rotulo="Marcação"
-            valor={`${new Date(`${data}T${hora}`).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })} · ${
+            valor={`${dataSelecionada ? format(dataSelecionada, "EEEE, d 'de' MMMM", { locale: pt }) : ""} às ${hora} · ${
               tipoMarcacao === "recolha_entrega" ? `Recolha/entrega (${zona})` : "Cliente traz o carro"
             }`}
           />
