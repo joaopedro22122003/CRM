@@ -25,7 +25,7 @@ export default async function NovoPedidoPage({
               name="q"
               defaultValue={q}
               placeholder="Pesquisar por nome ou telemóvel…"
-              className="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base focus:border-brand focus:outline-none"
+              className="w-full rounded-xl border border-neutral-300 bg-neutral-100 px-3.5 py-2.5 text-base focus:border-brand focus:outline-none"
             />
           </form>
 

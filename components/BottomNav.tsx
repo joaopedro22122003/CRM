@@ -17,7 +17,7 @@ export default function BottomNav() {
   if (pathname === "/login") return null;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-neutral-100/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex max-w-lg items-stretch justify-between">
         {ITENS.map(({ href, rotulo, icone: Icone }) => {
           const ativo = pathname === href || pathname.startsWith(`${href}/`);

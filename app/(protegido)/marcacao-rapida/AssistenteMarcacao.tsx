@@ -476,7 +476,7 @@ export default function AssistenteMarcacao({
                   type="button"
                   onClick={() => setHora(h)}
                   className={`rounded-xl border px-2 py-2.5 text-sm font-medium ${
-                    hora === h ? "border-brand bg-brand-50 text-brand-dark" : "border-neutral-200 text-neutral-700"
+                    hora === h ? "border-brand bg-brand-50 text-brand-300" : "border-neutral-200 text-neutral-700"
                   }`}
                 >
                   {h}
@@ -545,7 +545,7 @@ export default function AssistenteMarcacao({
 
       {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
 
-      <div className="fixed inset-x-0 bottom-16 z-10 mx-auto flex max-w-lg gap-2 border-t border-neutral-200 bg-white/95 p-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-16 z-10 mx-auto flex max-w-lg gap-2 border-t border-neutral-200 bg-neutral-100/95 p-3 backdrop-blur">
         {passo > 1 && (
           <Botao type="button" variante="secundario" className="flex-1" onClick={voltar}>
             Voltar

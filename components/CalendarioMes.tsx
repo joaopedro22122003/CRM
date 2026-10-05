@@ -35,40 +35,40 @@ export default function CalendarioMes({
   const dias = eachDayOfInterval({ start: inicioGrelha, end: fimGrelha });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-[280px] flex-col gap-2">
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={() => onMudarMes(subMonths(mesAtual, 1))}
           aria-label="Mês anterior"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <span className="text-sm font-semibold capitalize text-neutral-900">
+        <span className="text-xs font-semibold capitalize text-neutral-900">
           {format(mesAtual, "MMMM yyyy", { locale: pt })}
         </span>
         <button
           type="button"
           onClick={() => onMudarMes(addMonths(mesAtual, 1))}
           aria-label="Mês seguinte"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
           </svg>
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-neutral-400">
+      <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] text-neutral-400">
         {DIAS_SEMANA.map((d, i) => (
           <span key={i}>{d}</span>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {dias.map((dia) => {
           const noMes = isSameMonth(dia, mesAtual);
           const selecionado = diaSelecionado !== null && isSameDay(dia, diaSelecionado);
@@ -80,7 +80,7 @@ export default function CalendarioMes({
               key={dia.toISOString()}
               type="button"
               onClick={() => onSelecionarDia(dia)}
-              className={`flex aspect-square flex-col items-center justify-center gap-0.5 rounded-xl text-sm ${
+              className={`flex aspect-square flex-col items-center justify-center gap-0.5 rounded-lg text-xs ${
                 selecionado
                   ? "bg-brand text-white font-semibold"
                   : hoje

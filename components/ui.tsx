@@ -31,7 +31,7 @@ export function PageHeader({
 
 export function Cartao({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm ${className}`}>
+    <div className={`rounded-2xl border border-neutral-200 bg-neutral-100 p-4 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -107,7 +107,7 @@ export function Campo({
 }
 
 const classesInput =
-  "w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-base text-neutral-900 focus:border-brand focus:outline-none";
+  "w-full rounded-xl border border-neutral-300 bg-neutral-100 px-3.5 py-2.5 text-base text-neutral-900 focus:border-brand focus:outline-none";
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${classesInput} ${props.className ?? ""}`} />;
@@ -128,7 +128,7 @@ const coresBadge: Record<string, string> = {
   verde: "bg-green-50 text-green-700",
   vermelho: "bg-red-50 text-red-700",
   roxo: "bg-purple-50 text-purple-700",
-  marca: "bg-brand-50 text-brand-dark",
+  marca: "bg-brand-50 text-brand-300",
 };
 
 export function Badge({ cor = "cinza", children }: { cor?: keyof typeof coresBadge; children: ReactNode }) {

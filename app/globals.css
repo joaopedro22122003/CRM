@@ -1,19 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #121314;
+  --foreground: #f5f6f7;
 }
 
-/* Cores da marca Garagem do Jota, tiradas do logo. */
+/* Tema escuro da Garagem do Jota. Em vez de escurecer ecrã a ecrã,
+   redefinimos aqui os tons que a app já usa (neutral-*, e os "-50"
+   dos avisos/badges a cores) — como os componentes geram as classes
+   Tailwind a partir destas variáveis, a app toda fica escura sem
+   termos de tocar em cada ficheiro. */
 @theme {
-  --color-brand-50: #e6f6f5;
+  /* Marca */
+  --color-brand-50: #102e2c;
   --color-brand-100: #ccecea;
+  --color-brand-300: #5eead4;
   --color-brand-400: #14b3ae;
   --color-brand: #00a29e;
   --color-brand-600: #008a86;
   --color-brand-dark: #00625f;
-  --color-brand-950: #0b2322;
+  --color-brand-950: #0f3634;
+
+  /* Escala neutra: invertida para um tema escuro (0=fundo, 900=texto principal) */
+  --color-neutral-50: #121314;
+  --color-neutral-100: #1c1e20;
+  --color-neutral-200: #2a2d30;
+  --color-neutral-300: #3a3d41;
+  --color-neutral-400: #8a8d92;
+  --color-neutral-500: #a0a3a8;
+  --color-neutral-600: #b7b9bd;
+  --color-neutral-700: #d2d4d6;
+  --color-neutral-900: #f5f6f7;
+
+  /* Avisos e badges de estado — fundos escurecidos, texto claro */
+  --color-red-50: #2a1316;
+  --color-red-100: #3a1a1e;
+  --color-red-700: #f87171;
+  --color-amber-50: #2a2008;
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fcd34d;
+  --color-amber-900: #fde68a;
+  --color-blue-50: #10203a;
+  --color-blue-700: #60a5fa;
+  --color-green-50: #0f2419;
+  --color-green-700: #4ade80;
+  --color-purple-50: #241233;
+  --color-purple-700: #c084fc;
 }
 
 @theme inline {

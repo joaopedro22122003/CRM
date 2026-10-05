@@ -4,7 +4,7 @@
   "description": "CRM da Garagem do Jota — clientes, orçamentos, marcações e serviços",
   "start_url": "/pedidos",
   "display": "standalone",
-  "background_color": "#fafaf9",
+  "background_color": "#121314",
   "theme_color": "#00a29e",
   "lang": "pt-PT",
   "icons": [

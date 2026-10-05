@@ -23,8 +23,8 @@ export default function CalendarioMarcacoes({ marcacoes }: { marcacoes: Marcacao
   );
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <Cartao>
+    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:gap-5">
+      <Cartao className="sm:shrink-0 sm:self-start">
         <CalendarioMes
           mesAtual={mesAtual}
           onMudarMes={setMesAtual}
@@ -37,7 +37,7 @@ export default function CalendarioMarcacoes({ marcacoes }: { marcacoes: Marcacao
         />
       </Cartao>
 
-      <section className="flex flex-col gap-2">
+      <section className="flex min-w-0 flex-1 flex-col gap-2">
         <h2 className="text-sm font-semibold capitalize text-neutral-700">
           {format(diaSelecionado, "EEEE, d 'de' MMMM", { locale: pt })}
         </h2>
