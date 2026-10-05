@@ -2,6 +2,7 @@ import "server-only";
 import { criarClienteSupabase } from "@/lib/supabase/server";
 import type {
   Cliente,
+  EstadoFaturacao,
   EstadoPedido,
   Marcacao,
   Orcamento,
@@ -23,6 +24,67 @@ export async function listarPedidos(): Promise<PedidoResumo[]> {
     .order("updated_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as PedidoResumo[];
+}
+
+export interface PedidoComPagamento extends PedidoResumo {
+  /** Valor sugerido para a confirmação de pagamento: o do orçamento mais
+   * recente, ou o do serviço já registado, se já existir. */
+  valorSugerido: number | null;
+  /** null = ainda sem serviço/faturação; caso contrário o estado atual. */
+  estadoPagamento: EstadoFaturacao | null;
+}
+
+export async function listarPedidosComPagamento(): Promise<PedidoComPagamento[]> {
+  const supabase = criarClienteSupabase();
+  const pedidos = await listarPedidos();
+  if (pedidos.length === 0) return [];
+
+  const ids = pedidos.map((p) => p.id);
+
+  const [{ data: orcamentos, error: erroOrc }, { data: servicos, error: erroServ }] = await Promise.all([
+    supabase
+      .from("orcamentos")
+      .select("pedido_id, preco_entrada, created_at")
+      .in("pedido_id", ids)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("servicos")
+      .select("id, pedido_id, preco_final, created_at")
+      .in("pedido_id", ids)
+      .order("created_at", { ascending: false }),
+  ]);
+  if (erroOrc) throw erroOrc;
+  if (erroServ) throw erroServ;
+
+  const mapaOrcamento = new Map<string, number>();
+  for (const o of orcamentos ?? []) {
+    if (!mapaOrcamento.has(o.pedido_id)) mapaOrcamento.set(o.pedido_id, Number(o.preco_entrada));
+  }
+
+  const mapaServico = new Map<string, { id: string; preco_final: number }>();
+  for (const s of servicos ?? []) {
+    if (!mapaServico.has(s.pedido_id)) mapaServico.set(s.pedido_id, { id: s.id, preco_final: Number(s.preco_final) });
+  }
+
+  const servicoIds = [...mapaServico.values()].map((s) => s.id);
+  const mapaFaturacao = new Map<string, EstadoFaturacao>();
+  if (servicoIds.length > 0) {
+    const { data: faturacoes, error: erroFat } = await supabase
+      .from("faturacao")
+      .select("servico_id, estado")
+      .in("servico_id", servicoIds);
+    if (erroFat) throw erroFat;
+    for (const f of faturacoes ?? []) mapaFaturacao.set(f.servico_id, f.estado as EstadoFaturacao);
+  }
+
+  return pedidos.map((p) => {
+    const servico = mapaServico.get(p.id) ?? null;
+    return {
+      ...p,
+      valorSugerido: mapaOrcamento.get(p.id) ?? servico?.preco_final ?? null,
+      estadoPagamento: servico ? (mapaFaturacao.get(servico.id) ?? "pendente") : null,
+    };
+  });
 }
 
 export interface PedidoComDetalhe {

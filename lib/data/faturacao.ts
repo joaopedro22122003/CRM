@@ -48,6 +48,21 @@ export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
   return registos.map((r) => ({ ...r, orcamento: mapaOrcamentos.get(r.servico.pedido_id) ?? null }));
 }
 
+/** Confirma o pagamento de um serviço, com o valor que o cliente
+ * efetivamente pagou (pode diferir do preço orçamentado). */
+export async function marcarFaturacaoPaga(servicoId: string, valor: number): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("faturacao")
+    .update({
+      valor,
+      estado: "pago",
+      data_pagamento: new Date().toISOString().slice(0, 10),
+    })
+    .eq("servico_id", servicoId);
+  if (error) throw error;
+}
+
 export async function atualizarEstadoFaturacao(
   id: string,
   estado: EstadoFaturacao,

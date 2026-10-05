@@ -72,7 +72,7 @@ export interface DadosServico {
   notas_incidentes: string | null;
 }
 
-export async function criarServico(dados: DadosServico): Promise<Servico> {
+export async function criarServico(dados: DadosServico, opcoes?: { pago?: boolean }): Promise<Servico> {
   const supabase = criarClienteSupabase();
 
   const { data: servico, error } = await supabase.from("servicos").insert(dados).select().single();
@@ -87,10 +87,12 @@ export async function criarServico(dados: DadosServico): Promise<Servico> {
     await supabase.from("marcacoes").update({ estado: "concluido" }).eq("id", dados.marcacao_id);
   }
 
+  const pago = opcoes?.pago ?? false;
   await supabase.from("faturacao").insert({
     servico_id: servico.id,
     valor: dados.preco_final,
-    estado: "pendente",
+    estado: pago ? "pago" : "pendente",
+    data_pagamento: pago ? new Date().toISOString().slice(0, 10) : null,
   });
 
   return servico;

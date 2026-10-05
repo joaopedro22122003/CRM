@@ -3,38 +3,63 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const ITENS = [
+type ItemNavTipo = { href: string; rotulo: string; icone: (props: PropsIcone) => React.ReactElement };
+
+const ITENS_ESQUERDA: ItemNavTipo[] = [
   { href: "/pedidos", rotulo: "Pedidos", icone: IconePedidos },
   { href: "/clientes", rotulo: "Clientes", icone: IconeClientes },
+];
+
+const ITENS_DIREITA: ItemNavTipo[] = [
   { href: "/marcacoes", rotulo: "Marcações", icone: IconeMarcacoes },
   { href: "/servicos", rotulo: "Serviços", icone: IconeServicos },
   { href: "/mais", rotulo: "Mais", icone: IconeMais },
-] as const;
+];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   if (pathname === "/login") return null;
 
+  function ItemNav({ href, rotulo, icone: Icone }: ItemNavTipo) {
+    const ativo = pathname === href || pathname.startsWith(`${href}/`);
+    return (
+      <li className="flex-1">
+        <Link
+          href={href}
+          className={`flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
+            ativo ? "text-brand" : "text-neutral-400"
+          }`}
+        >
+          <Icone ativo={ativo} />
+          {rotulo}
+        </Link>
+      </li>
+    );
+  }
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-neutral-100/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex max-w-lg items-stretch justify-between">
-        {ITENS.map(({ href, rotulo, icone: Icone }) => {
-          const ativo = pathname === href || pathname.startsWith(`${href}/`);
-          return (
-            <li key={href} className="flex-1">
-              <Link
-                href={href}
-                className={`flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
-                  ativo ? "text-brand" : "text-neutral-400"
-                }`}
-              >
-                <Icone ativo={ativo} />
-                {rotulo}
-              </Link>
-            </li>
-          );
-        })}
+        {ITENS_ESQUERDA.map((item) => (
+          <ItemNav key={item.href} {...item} />
+        ))}
+
+        <li className="flex flex-1 items-start justify-center">
+          <Link
+            href="/marcacao-rapida"
+            aria-label="Novo pedido"
+            className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand-dark/30 active:bg-brand-dark"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={2.4}>
+              <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+            </svg>
+          </Link>
+        </li>
+
+        {ITENS_DIREITA.map((item) => (
+          <ItemNav key={item.href} {...item} />
+        ))}
       </ul>
     </nav>
   );

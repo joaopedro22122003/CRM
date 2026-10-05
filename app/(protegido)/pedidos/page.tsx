@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { PageHeader, Cartao, EstadoVazio, Badge } from "@/components/ui";
-import { listarPedidos } from "@/lib/data/pedidos";
+import { listarPedidosComPagamento } from "@/lib/data/pedidos";
 import { ESTADOS_PEDIDO, type EstadoPedido } from "@/lib/types";
+import BotaoPago from "./BotaoPago";
 
 const CORES_ESTADO: Record<EstadoPedido, "cinza" | "azul" | "amarelo" | "verde" | "vermelho" | "roxo"> = {
   novo: "azul",
@@ -13,7 +14,7 @@ const CORES_ESTADO: Record<EstadoPedido, "cinza" | "azul" | "amarelo" | "verde" 
 };
 
 export default async function PedidosPage() {
-  const pedidos = await listarPedidos();
+  const pedidos = await listarPedidosComPagamento();
 
   const grupos = ESTADOS_PEDIDO.map(({ valor, rotulo }) => ({
     valor,
@@ -54,17 +55,26 @@ export default async function PedidosPage() {
               <ul className="flex flex-col gap-2">
                 {grupo.pedidos.map((pedido) => (
                   <li key={pedido.id}>
-                    <Link href={`/pedidos/${pedido.id}`}>
-                      <Cartao className="flex items-center justify-between gap-3 active:bg-neutral-50">
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold text-neutral-900">{pedido.cliente.nome}</p>
-                          <p className="truncate text-sm text-neutral-500">
-                            {pedido.viatura ? `${pedido.viatura.marca} ${pedido.viatura.modelo}` : "Sem viatura associada"}
-                          </p>
-                        </div>
+                    <Cartao className="flex items-center justify-between gap-3">
+                      <Link href={`/pedidos/${pedido.id}`} className="min-w-0 flex-1 active:opacity-70">
+                        <p className="truncate font-semibold text-neutral-900">{pedido.cliente.nome}</p>
+                        <p className="truncate text-sm text-neutral-500">
+                          {pedido.viatura ? `${pedido.viatura.marca} ${pedido.viatura.modelo}` : "Sem viatura associada"}
+                        </p>
+                      </Link>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <Badge cor={CORES_ESTADO[pedido.estado]}>{grupo.rotulo}</Badge>
-                      </Cartao>
-                    </Link>
+                        {pedido.estadoPagamento === "pago" ? (
+                          <Badge cor="verde">Pago</Badge>
+                        ) : (
+                          <BotaoPago
+                            pedidoId={pedido.id}
+                            valorSugerido={pedido.valorSugerido}
+                            temViatura={pedido.viatura !== null}
+                          />
+                        )}
+                      </div>
+                    </Cartao>
                   </li>
                 ))}
               </ul>
