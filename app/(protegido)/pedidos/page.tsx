@@ -14,7 +14,9 @@ const CORES_ESTADO: Record<EstadoPedido, "cinza" | "azul" | "amarelo" | "verde" 
 };
 
 export default async function PedidosPage() {
-  const pedidos = await listarPedidosComPagamento();
+  const todosPedidos = await listarPedidosComPagamento();
+  // Pedidos já pagos saem daqui — passam a viver só na Faturação.
+  const pedidos = todosPedidos.filter((p) => p.estadoPagamento !== "pago");
 
   const grupos = ESTADOS_PEDIDO.map(({ valor, rotulo }) => ({
     valor,
@@ -64,15 +66,11 @@ export default async function PedidosPage() {
                       </Link>
                       <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <Badge cor={CORES_ESTADO[pedido.estado]}>{grupo.rotulo}</Badge>
-                        {pedido.estadoPagamento === "pago" ? (
-                          <Badge cor="verde">Pago</Badge>
-                        ) : (
-                          <BotaoPago
-                            pedidoId={pedido.id}
-                            valorSugerido={pedido.valorSugerido}
-                            temViatura={pedido.viatura !== null}
-                          />
-                        )}
+                        <BotaoPago
+                          pedidoId={pedido.id}
+                          valorSugerido={pedido.valorSugerido}
+                          temViatura={pedido.viatura !== null}
+                        />
                       </div>
                     </Cartao>
                   </li>

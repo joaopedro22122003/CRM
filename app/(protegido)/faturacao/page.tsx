@@ -6,6 +6,7 @@ import { formatarEuros } from "@/lib/pricing";
 
 export default async function FaturacaoPage() {
   const registos = await listarFaturacao();
+  const totalFaturado = registos.reduce((s, r) => s + Number(r.valor), 0);
   const totalPendente = registos.filter((r) => r.estado === "pendente").reduce((s, r) => s + Number(r.valor), 0);
 
   return (
@@ -13,6 +14,13 @@ export default async function FaturacaoPage() {
       <PageHeader titulo="Faturação" voltarPara="/mais" />
 
       <div className="flex flex-col gap-4 p-4">
+        {registos.length > 0 && (
+          <Cartao className="flex flex-col items-center gap-1 border-brand bg-brand-50 py-5 text-center">
+            <span className="text-sm font-medium text-brand-300">Total faturado</span>
+            <span className="text-3xl font-bold text-neutral-900">{formatarEuros(totalFaturado)}</span>
+          </Cartao>
+        )}
+
         {totalPendente > 0 && (
           <Cartao className="flex items-center justify-between bg-amber-50">
             <span className="text-sm font-medium text-amber-800">Total por receber</span>
