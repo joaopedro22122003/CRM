@@ -86,6 +86,8 @@ export async function marcarPedidoPagoAction(
   revalidatePath(`/pedidos/${pedidoId}`);
   revalidatePath("/faturacao");
   revalidatePath("/servicos");
+  revalidatePath("/marcacoes");
+  revalidatePath("/para-contactar");
 
   return {};
 }

@@ -3,9 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { criarMarcacao, atualizarEstadoMarcacao, obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
-import { obterPedidoComDetalhe } from "@/lib/data/pedidos";
-import { criarServico, desfazerServicoDaMarcacao } from "@/lib/data/servicos";
-import { marcarFaturacaoPaga } from "@/lib/data/faturacao";
+import { desfazerServicoDaMarcacao } from "@/lib/data/servicos";
 import type { TipoMarcacao } from "@/lib/types";
 
 export type EstadoFormulario = { erro?: string };
@@ -50,48 +48,6 @@ function revalidarTudo(marcacaoId: string, pedidoId: string) {
   revalidatePath("/faturacao");
   revalidatePath("/servicos");
   revalidatePath("/para-contactar");
-}
-
-/** Um só toque: marca a marcação como concluída, regista a data de hoje
- * como data do serviço e confirma o pagamento — tudo ao mesmo tempo, para
- * não obrigar a passar por dois sítios diferentes. Reaproveita
- * criarServico/marcarFaturacaoPaga, as mesmas funções usadas por
- * "Registar serviço" e pelo botão "Pago" em Pedidos — nunca duplica a
- * escrita da data nem do valor. */
-export async function marcarMarcacaoPagaAction(marcacaoId: string, valor: number): Promise<EstadoAcaoMarcacao> {
-  if (!valor || valor <= 0) return { erro: "Indica um valor válido." };
-
-  const detalheMarcacao = await obterMarcacaoComDetalhe(marcacaoId);
-  if (!detalheMarcacao) return { erro: "Marcação não encontrada." };
-  const { pedido, cliente, viatura } = detalheMarcacao;
-  if (!viatura) return { erro: "Este pedido não tem viatura associada." };
-
-  const detalhePedido = await obterPedidoComDetalhe(pedido.id);
-  const servicoDestaMarcacao = detalhePedido?.servicos.find((s) => s.marcacao_id === marcacaoId) ?? null;
-
-  if (servicoDestaMarcacao) {
-    await marcarFaturacaoPaga(servicoDestaMarcacao.id, valor);
-    await atualizarEstadoMarcacao(marcacaoId, "concluido");
-  } else {
-    await criarServico(
-      {
-        pedido_id: pedido.id,
-        marcacao_id: marcacaoId,
-        viatura_id: viatura.id,
-        cliente_id: cliente.id,
-        data_conclusao: new Date().toISOString().slice(0, 10),
-        preco_final: valor,
-        custo_produtos: 0,
-        tempo_execucao_min: null,
-        tempo_deslocacao_min: 0,
-        notas_incidentes: null,
-      },
-      { pago: true }
-    );
-  }
-
-  revalidarTudo(marcacaoId, pedido.id);
-  return {};
 }
 
 export async function cancelarMarcacaoAction(marcacaoId: string): Promise<EstadoAcaoMarcacao> {
