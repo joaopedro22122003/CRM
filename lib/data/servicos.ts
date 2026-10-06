@@ -72,7 +72,10 @@ export interface DadosServico {
   notas_incidentes: string | null;
 }
 
-export async function criarServico(dados: DadosServico, opcoes?: { pago?: boolean }): Promise<Servico> {
+export async function criarServico(
+  dados: DadosServico,
+  opcoes?: { pago?: boolean; valorPorConfirmar?: boolean }
+): Promise<Servico> {
   const supabase = criarClienteSupabase();
 
   const { data: servico, error } = await supabase.from("servicos").insert(dados).select().single();
@@ -93,9 +96,48 @@ export async function criarServico(dados: DadosServico, opcoes?: { pago?: boolea
     valor: dados.preco_final,
     estado: pago ? "pago" : "pendente",
     data_pagamento: pago ? new Date().toISOString().slice(0, 10) : null,
+    valor_por_confirmar: opcoes?.valorPorConfirmar ?? false,
   });
 
   return servico;
+}
+
+export type ResultadoDesfazerServico = "removido" | "bloqueado_pago" | "nada_a_fazer";
+
+/** Desfaz o serviço criado a partir de uma marcação específica (nunca
+ * outro serviço do mesmo pedido), usado para reverter um toque errado em
+ * "Serviço feito". Nunca apaga um pagamento já confirmado — nesse caso
+ * bloqueia e deixa tudo como está. */
+export async function desfazerServicoDaMarcacao(marcacaoId: string): Promise<ResultadoDesfazerServico> {
+  const supabase = criarClienteSupabase();
+
+  const { data: servico, error: erroServico } = await supabase
+    .from("servicos")
+    .select("id, pedido_id")
+    .eq("marcacao_id", marcacaoId)
+    .maybeSingle();
+  if (erroServico) throw erroServico;
+  if (!servico) return "nada_a_fazer";
+
+  const { data: faturacao, error: erroFat } = await supabase
+    .from("faturacao")
+    .select("estado")
+    .eq("servico_id", servico.id)
+    .maybeSingle();
+  if (erroFat) throw erroFat;
+  if (faturacao?.estado === "pago") return "bloqueado_pago";
+
+  // O "on delete cascade" do esquema (0001_init.sql) apaga sozinho a
+  // faturação pendente e as fotos associadas a este serviço.
+  const { error: erroApagar } = await supabase.from("servicos").delete().eq("id", servico.id);
+  if (erroApagar) throw erroApagar;
+
+  await supabase
+    .from("pedidos")
+    .update({ estado: "marcado", updated_at: new Date().toISOString() })
+    .eq("id", servico.pedido_id);
+
+  return "removido";
 }
 
 export async function adicionarFotos(

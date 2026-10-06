@@ -18,7 +18,12 @@ const ITENS_ESQUERDA: ItemNavTipo[] = [
 
 const ITENS_DIREITA: ItemNavTipo[] = [
   { href: "/marcacoes", rotulo: "Marcações", icone: IconeMarcacoes },
-  { href: "/mais", rotulo: "Mais", icone: IconeMais, ativoEm: ["/servicos", "/faturacao", "/despesas"] },
+  {
+    href: "/mais",
+    rotulo: "Mais",
+    icone: IconeMais,
+    ativoEm: ["/servicos", "/faturacao", "/despesas", "/para-contactar"],
+  },
 ];
 
 export default function BottomNav() {

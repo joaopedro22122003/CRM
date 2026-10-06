@@ -67,22 +67,30 @@ export async function listarPedidosComPagamento(): Promise<PedidoComPagamento[]>
   }
 
   const servicoIds = [...mapaServico.values()].map((s) => s.id);
-  const mapaFaturacao = new Map<string, EstadoFaturacao>();
+  const mapaFaturacao = new Map<string, { estado: EstadoFaturacao; valorPorConfirmar: boolean }>();
   if (servicoIds.length > 0) {
     const { data: faturacoes, error: erroFat } = await supabase
       .from("faturacao")
-      .select("servico_id, estado")
+      .select("servico_id, estado, valor_por_confirmar")
       .in("servico_id", servicoIds);
     if (erroFat) throw erroFat;
-    for (const f of faturacoes ?? []) mapaFaturacao.set(f.servico_id, f.estado as EstadoFaturacao);
+    for (const f of faturacoes ?? [])
+      mapaFaturacao.set(f.servico_id, {
+        estado: f.estado as EstadoFaturacao,
+        valorPorConfirmar: f.valor_por_confirmar,
+      });
   }
 
   return pedidos.map((p) => {
     const servico = mapaServico.get(p.id) ?? null;
+    const faturacao = servico ? mapaFaturacao.get(servico.id) : undefined;
     return {
       ...p,
-      valorSugerido: mapaOrcamento.get(p.id) ?? servico?.preco_final ?? null,
-      estadoPagamento: servico ? (mapaFaturacao.get(servico.id) ?? "pendente") : null,
+      // Valor por confirmar: o campo abre em branco em vez de sugerir 0€.
+      valorSugerido: faturacao?.valorPorConfirmar
+        ? null
+        : (mapaOrcamento.get(p.id) ?? servico?.preco_final ?? null),
+      estadoPagamento: servico ? (faturacao?.estado ?? "pendente") : null,
     };
   });
 }

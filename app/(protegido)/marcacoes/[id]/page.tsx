@@ -2,10 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { PageHeader, Cartao, Select, Botao, BotaoLink } from "@/components/ui";
+import { PageHeader, Cartao, BotaoLink } from "@/components/ui";
 import { obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
-import { mudarEstadoMarcacaoAction } from "../actions";
 import { linkWhatsApp } from "@/lib/whatsapp";
+import AcoesMarcacao from "../AcoesMarcacao";
 
 export default async function MarcacaoDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -64,21 +64,13 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
             )}
           </div>
 
-          <form action={mudarEstadoMarcacaoAction} className="flex items-center gap-2 border-t border-neutral-100 pt-3">
-            <input type="hidden" name="marcacao_id" value={marcacao.id} />
-            <Select name="estado" defaultValue={marcacao.estado} className="flex-1">
-              <option value="agendado">Agendado</option>
-              <option value="concluido">Concluído</option>
-              <option value="cancelado">Cancelado</option>
-            </Select>
-            <Botao variante="secundario" className="shrink-0 px-3 py-2 text-sm">
-              Atualizar
-            </Botao>
-          </form>
+          <div className="border-t border-neutral-100 pt-3">
+            <AcoesMarcacao marcacaoId={marcacao.id} estadoAtual={marcacao.estado} />
+          </div>
         </Cartao>
 
-        <BotaoLink href={`/servicos/novo?pedido_id=${pedido.id}&marcacao_id=${marcacao.id}`}>
-          Registar serviço concluído
+        <BotaoLink variante="secundario" href={`/servicos/novo?pedido_id=${pedido.id}&marcacao_id=${marcacao.id}`}>
+          Registar serviço com mais detalhe (fotos, custos…)
         </BotaoLink>
       </div>
     </>

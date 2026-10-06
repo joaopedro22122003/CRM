@@ -100,3 +100,14 @@ export async function apagarCliente(id: string): Promise<void> {
   const { error } = await supabase.from("clientes").delete().eq("id", id);
   if (error) throw error;
 }
+
+/** Regista que o cliente foi contactado hoje (ex.: lembrete de
+ * manutenção via WhatsApp) — nunca apaga o cliente, só grava a data. */
+export async function marcarClienteContactado(id: string): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("clientes")
+    .update({ contactado_em: new Date().toISOString().slice(0, 10) })
+    .eq("id", id);
+  if (error) throw error;
+}

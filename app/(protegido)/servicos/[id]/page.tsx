@@ -46,10 +46,15 @@ export default async function ServicoDetalhePage({ params }: { params: Promise<{
           )}
 
           <div className="mt-2 grid grid-cols-2 gap-3 border-t border-neutral-100 pt-3 text-sm">
-            <Linha rotulo="Preço final" valor={formatarEuros(Number(servico.preco_final))} />
+            <Linha
+              rotulo="Preço final"
+              valor={faturacao?.valor_por_confirmar ? "Por confirmar" : formatarEuros(Number(servico.preco_final))}
+            />
             <Linha rotulo="Custo produtos" valor={formatarEuros(Number(servico.custo_produtos))} />
-            <Linha rotulo="Margem" valor={formatarEuros(margem)} />
-            {lucroHora !== null && <Linha rotulo="Lucro/hora" valor={formatarEuros(lucroHora)} />}
+            {!faturacao?.valor_por_confirmar && <Linha rotulo="Margem" valor={formatarEuros(margem)} />}
+            {!faturacao?.valor_por_confirmar && lucroHora !== null && (
+              <Linha rotulo="Lucro/hora" valor={formatarEuros(lucroHora)} />
+            )}
             {servico.tempo_execucao_min != null && <Linha rotulo="Tempo execução" valor={`${servico.tempo_execucao_min} min`} />}
             {servico.tempo_deslocacao_min > 0 && <Linha rotulo="Tempo deslocação" valor={`${servico.tempo_deslocacao_min} min`} />}
           </div>
@@ -65,8 +70,8 @@ export default async function ServicoDetalhePage({ params }: { params: Promise<{
           <Cartao className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-neutral-900">Faturação</h2>
-              <Badge cor={faturacao.estado === "pago" ? "verde" : "amarelo"}>
-                {faturacao.estado === "pago" ? "Pago" : "Pendente"}
+              <Badge cor={faturacao.valor_por_confirmar ? "amarelo" : faturacao.estado === "pago" ? "verde" : "amarelo"}>
+                {faturacao.valor_por_confirmar ? "Valor por confirmar" : faturacao.estado === "pago" ? "Pago" : "Pendente"}
               </Badge>
             </div>
             <form action={mudarEstadoFaturacaoAction} className="flex flex-col gap-2">
