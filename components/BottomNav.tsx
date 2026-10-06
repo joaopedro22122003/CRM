@@ -51,15 +51,18 @@ export default function BottomNav() {
           <ItemNav key={item.href} {...item} />
         ))}
 
-        <li className="flex flex-1 items-start justify-center">
+        <li className="flex-1">
           <Link
             href="/marcacao-rapida"
             aria-label="Novo pedido"
-            className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-lg shadow-brand-dark/30 active:bg-brand-dark"
+            className="flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium text-brand"
           >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={2.4}>
-              <path strokeLinecap="round" d="M12 5v14M5 12h14" />
-            </svg>
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-white active:bg-brand-dark">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.6}>
+                <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+              </svg>
+            </span>
+            Novo
           </Link>
         </li>
 
