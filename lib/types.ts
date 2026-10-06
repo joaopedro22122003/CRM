@@ -133,6 +133,14 @@ export interface ServicoFoto {
   created_at: string;
 }
 
+export interface Despesa {
+  id: string;
+  valor: number;
+  descricao: string;
+  data: string;
+  created_at: string;
+}
+
 export interface Faturacao {
   id: string;
   servico_id: string;
