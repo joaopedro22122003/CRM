@@ -3,6 +3,7 @@ import { PageHeader, Cartao } from "@/components/ui";
 import { sairAction } from "./actions";
 
 const LIGACOES = [
+  { href: "/servicos", titulo: "Serviços", descricao: "Histórico de serviços registados" },
   { href: "/faturacao", titulo: "Faturação", descricao: "Pagamentos por receber e histórico" },
 ];
 

@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-type ItemNavTipo = { href: string; rotulo: string; icone: (props: PropsIcone) => React.ReactElement };
+type ItemNavTipo = {
+  href: string;
+  rotulo: string;
+  icone: (props: PropsIcone) => React.ReactElement;
+  /** Outras secções que também devem acender este item (ex.: Mais cobre Serviços e Faturação). */
+  ativoEm?: string[];
+};
 
 const ITENS_ESQUERDA: ItemNavTipo[] = [
   { href: "/pedidos", rotulo: "Pedidos", icone: IconePedidos },
@@ -12,8 +18,7 @@ const ITENS_ESQUERDA: ItemNavTipo[] = [
 
 const ITENS_DIREITA: ItemNavTipo[] = [
   { href: "/marcacoes", rotulo: "Marcações", icone: IconeMarcacoes },
-  { href: "/servicos", rotulo: "Serviços", icone: IconeServicos },
-  { href: "/mais", rotulo: "Mais", icone: IconeMais },
+  { href: "/mais", rotulo: "Mais", icone: IconeMais, ativoEm: ["/servicos", "/faturacao"] },
 ];
 
 export default function BottomNav() {
@@ -21,8 +26,9 @@ export default function BottomNav() {
 
   if (pathname === "/login") return null;
 
-  function ItemNav({ href, rotulo, icone: Icone }: ItemNavTipo) {
-    const ativo = pathname === href || pathname.startsWith(`${href}/`);
+  function ItemNav({ href, rotulo, icone: Icone, ativoEm }: ItemNavTipo) {
+    const prefixos = [href, ...(ativoEm ?? [])];
+    const ativo = prefixos.some((p) => pathname === p || pathname.startsWith(`${p}/`));
     return (
       <li className="flex-1">
         <Link
@@ -91,14 +97,6 @@ function IconeMarcacoes({ ativo }: PropsIcone) {
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={ativo ? 2.2 : 1.8}>
       <rect x="4" y="5" width="16" height="15" rx="2" />
       <path strokeLinecap="round" d="M8 3v4M16 3v4M4 10h16" />
-    </svg>
-  );
-}
-
-function IconeServicos({ ativo }: PropsIcone) {
-  return (
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth={ativo ? 2.2 : 1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
     </svg>
   );
 }
