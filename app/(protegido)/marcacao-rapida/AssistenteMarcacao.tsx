@@ -5,7 +5,7 @@ import { format, isSameDay } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Botao, Campo, Cartao, Input, Select, Textarea } from "@/components/ui";
 import CalendarioMes from "@/components/CalendarioMes";
-import { calcularPrecoOrcamento, formatarEuros, materialDefinido } from "@/lib/pricing";
+import { calcularPrecoOrcamento, formatarEuros, materialDefinido, extraJaIncluidoNoPacote } from "@/lib/pricing";
 import {
   ROTULOS_MATERIAL_BANCOS,
   type ConfiguracaoPrecos,
@@ -87,12 +87,17 @@ export default function AssistenteMarcacao({
     modoViatura === "existente" ? (viaturaSelecionada?.material_bancos ?? null) : novoMaterial;
   const estofosDisponiveis = materialEfetivo !== null && materialDefinido(materialEfetivo);
 
+  const extrasDisponiveis = useMemo(
+    () => extrasCatalogo.filter((e) => !extraJaIncluidoNoPacote(pacote, e.descricao)),
+    [extrasCatalogo, pacote]
+  );
+
   const extras = useMemo(
     () =>
-      extrasCatalogo
+      extrasDisponiveis
         .filter((e) => extrasSelecionados.has(e.id))
         .map((e) => ({ descricao: e.descricao, preco: Number(e.preco) })),
-    [extrasCatalogo, extrasSelecionados]
+    [extrasDisponiveis, extrasSelecionados]
   );
 
   const resultado = useMemo(
@@ -340,15 +345,6 @@ export default function AssistenteMarcacao({
               <Campo label="Matrícula (opcional)">
                 <Input value={novaMatricula} onChange={(e) => setNovaMatricula(e.target.value)} />
               </Campo>
-              <Campo label="Material dos bancos">
-                <Select value={novoMaterial} onChange={(e) => setNovoMaterial(e.target.value as MaterialBancos)}>
-                  <option value="por_definir">Por definir</option>
-                  <option value="pele">Pele</option>
-                  <option value="sintetico">Sintético</option>
-                  <option value="tecido">Tecido</option>
-                  <option value="alcantara">Alcântara</option>
-                </Select>
-              </Campo>
             </div>
           )}
         </Cartao>
@@ -387,21 +383,52 @@ export default function AssistenteMarcacao({
               <span className="font-medium text-neutral-900">Limpeza de estofos</span>
               <input
                 type="checkbox"
-                checked={temEstofos && estofosDisponiveis}
-                disabled={!estofosDisponiveis}
+                checked={temEstofos}
+                disabled={modoViatura === "existente" && !estofosDisponiveis}
                 onChange={(e) => setTemEstofos(e.target.checked)}
                 className="h-5 w-5"
               />
             </label>
-            {!estofosDisponiveis && (
-              <p className="text-xs text-amber-700">Define o material dos bancos no passo anterior para orçamentar estofos.</p>
+
+            {modoViatura === "existente" && !estofosDisponiveis && (
+              <p className="text-xs text-amber-700">
+                Define o material dos bancos na ficha da viatura para orçamentar estofos.
+              </p>
+            )}
+
+            {temEstofos && modoViatura === "novo" && (
+              <Campo label="Material dos bancos">
+                <Select value={novoMaterial} onChange={(e) => setNovoMaterial(e.target.value as MaterialBancos)}>
+                  <option value="por_definir">Por definir</option>
+                  <option value="pele">Pele</option>
+                  <option value="sintetico">Sintético</option>
+                  <option value="tecido">Tecido</option>
+                  <option value="alcantara">Alcântara</option>
+                </Select>
+              </Campo>
+            )}
+
+            {temEstofos && !estofosDisponiveis && modoViatura === "novo" && (
+              <p className="text-xs text-amber-700">Escolhe o material para o preço dos estofos entrar no orçamento.</p>
+            )}
+
+            {temEstofos && estofosDisponiveis && (
+              <p className="text-sm text-neutral-600">
+                Material: {ROTULOS_MATERIAL_BANCOS[materialEfetivo as MaterialBancos]} — desde{" "}
+                {formatarEuros(resultado.precoEstofos)}
+              </p>
             )}
           </div>
 
-          {extrasCatalogo.length > 0 && (
+          {extrasDisponiveis.length > 0 && (
             <div className="flex flex-col gap-2">
               <span className="text-sm font-medium text-neutral-700">Extras (opcional)</span>
-              {extrasCatalogo.map((extra) => {
+              {pacote === "completo" && (
+                <p className="text-xs text-neutral-500">
+                  O pacote Completo já inclui cera líquida, renovação de plásticos e remoção de calcário.
+                </p>
+              )}
+              {extrasDisponiveis.map((extra) => {
                 const selecionado = extrasSelecionados.has(extra.id);
                 return (
                   <label

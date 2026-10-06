@@ -21,6 +21,19 @@ export interface ResultadoPreco {
   precoEntrada: number;
 }
 
+/** O pacote Completo já inclui estes extras — não faz sentido serem
+ * selecionáveis (e cobrados) outra vez quando esse pacote está escolhido. */
+const EXTRAS_INCLUIDOS_NO_COMPLETO = [
+  "Cera líquida",
+  "Renovação de plásticos exteriores",
+  "Renovação de plásticos interiores",
+  "Remoção de calcário nos vidros",
+];
+
+export function extraJaIncluidoNoPacote(pacote: Pacote, descricaoExtra: string): boolean {
+  return pacote === "completo" && EXTRAS_INCLUIDOS_NO_COMPLETO.includes(descricaoExtra);
+}
+
 /** Verifica se o material dos bancos já foi definido na viatura —
  * necessário antes de orçamentar limpeza de estofos. O preço dos
  * estofos é único, independente do material (só regista qual foi). */

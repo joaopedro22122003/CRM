@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import { guardarOrcamento, type EstadoFormulario } from "./actions";
 import { Botao, Campo, Textarea } from "@/components/ui";
-import { calcularPrecoOrcamento, materialDefinido, formatarEuros } from "@/lib/pricing";
+import { calcularPrecoOrcamento, materialDefinido, formatarEuros, extraJaIncluidoNoPacote } from "@/lib/pricing";
 import { ROTULOS_MATERIAL_BANCOS, type ConfiguracaoPrecos, type ExtraCatalogo, type MaterialBancos, type Pacote } from "@/lib/types";
 
 const ESTADO_INICIAL: EstadoFormulario = {};
@@ -34,12 +34,17 @@ export default function OrcamentoForm({
 
   const estofosDisponiveis = materialBancos !== null && materialDefinido(materialBancos);
 
+  const extrasDisponiveis = useMemo(
+    () => extrasCatalogo.filter((extra) => !extraJaIncluidoNoPacote(pacote, extra.descricao)),
+    [extrasCatalogo, pacote]
+  );
+
   const extras = useMemo(
     () =>
-      extrasCatalogo
+      extrasDisponiveis
         .filter((extra) => extrasSelecionados.has(extra.id))
         .map((extra) => ({ descricao: extra.descricao, preco: Number(extra.preco) })),
-    [extrasCatalogo, extrasSelecionados]
+    [extrasDisponiveis, extrasSelecionados]
   );
 
   const resultado = useMemo(
@@ -128,13 +133,18 @@ export default function OrcamentoForm({
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-neutral-700">Extras (opcional)</span>
-        {extrasCatalogo.length === 0 ? (
+        {pacote === "completo" && (
+          <p className="text-xs text-neutral-500">
+            O pacote Completo já inclui cera líquida, renovação de plásticos e remoção de calcário.
+          </p>
+        )}
+        {extrasDisponiveis.length === 0 ? (
           <p className="text-xs text-neutral-500">
             Sem extras no catálogo. Podes adicionar na tabela &quot;extras_catalogo&quot; do Supabase.
           </p>
         ) : (
           <div className="flex flex-col gap-2">
-            {extrasCatalogo.map((extra) => {
+            {extrasDisponiveis.map((extra) => {
               const selecionado = extrasSelecionados.has(extra.id);
               return (
                 <label

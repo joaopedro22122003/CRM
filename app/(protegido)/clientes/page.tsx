@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageHeader, Cartao, BotaoLink, EstadoVazio, Badge } from "@/components/ui";
 import { listarClientes } from "@/lib/data/clientes";
 import { ROTULOS_FONTE } from "@/lib/types";
+import BotaoApagarClienteX from "./BotaoApagarClienteX";
 
 export default async function ClientesPage({
   searchParams,
@@ -48,9 +49,9 @@ export default async function ClientesPage({
         ) : (
           <ul className="flex flex-col gap-2">
             {clientes.map((cliente) => (
-              <li key={cliente.id}>
+              <li key={cliente.id} className="group relative">
                 <Link href={`/clientes/${cliente.id}`}>
-                  <Cartao className="flex items-center justify-between gap-3 active:bg-neutral-50">
+                  <Cartao className="flex items-center justify-between gap-3 pr-12 active:bg-neutral-50">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-neutral-900">{cliente.nome}</p>
                       <p className="text-sm text-neutral-500">{cliente.telefone}</p>
@@ -58,6 +59,7 @@ export default async function ClientesPage({
                     <Badge cor="cinza">{ROTULOS_FONTE[cliente.fonte]}</Badge>
                   </Cartao>
                 </Link>
+                <BotaoApagarClienteX clienteId={cliente.id} nome={cliente.nome} />
               </li>
             ))}
           </ul>
