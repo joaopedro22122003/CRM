@@ -150,8 +150,6 @@ export interface Faturacao {
   data_pagamento: string | null;
   metodo_pagamento: string | null;
   estado: EstadoFaturacao;
-  /** true quando o valor é um preço provisório (serviço criado sem orçamento) — nunca conta nas somas. */
-  valor_por_confirmar: boolean;
   notas: string | null;
   created_at: string;
 }

@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { PageHeader, Cartao, BotaoLink } from "@/components/ui";
 import { obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
+import { obterPedidoComDetalhe } from "@/lib/data/pedidos";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import AcoesMarcacao from "../AcoesMarcacao";
 
@@ -14,6 +15,12 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
 
   const { marcacao, pedido, cliente, viatura } = detalhe;
   const dataHora = new Date(marcacao.data_hora);
+
+  const detalhePedido = await obterPedidoComDetalhe(pedido.id);
+  const servicoDestaMarcacao = detalhePedido?.servicos.find((s) => s.marcacao_id === marcacao.id) ?? null;
+  const valorSugerido = servicoDestaMarcacao
+    ? Number(servicoDestaMarcacao.preco_final)
+    : (detalhePedido?.orcamentos[0] ? Number(detalhePedido.orcamentos[0].preco_entrada) : null);
 
   return (
     <>
@@ -65,7 +72,12 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
           </div>
 
           <div className="border-t border-neutral-100 pt-3">
-            <AcoesMarcacao marcacaoId={marcacao.id} estadoAtual={marcacao.estado} />
+            <AcoesMarcacao
+              marcacaoId={marcacao.id}
+              estadoAtual={marcacao.estado}
+              valorSugerido={valorSugerido}
+              temViatura={viatura !== null}
+            />
           </div>
         </Cartao>
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { criarMarcacao, atualizarEstadoMarcacao, obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
 import { obterPedidoComDetalhe } from "@/lib/data/pedidos";
 import { criarServico, desfazerServicoDaMarcacao } from "@/lib/data/servicos";
+import { marcarFaturacaoPaga } from "@/lib/data/faturacao";
 import type { TipoMarcacao } from "@/lib/types";
 
 export type EstadoFormulario = { erro?: string };
@@ -51,11 +52,15 @@ function revalidarTudo(marcacaoId: string, pedidoId: string) {
   revalidatePath("/para-contactar");
 }
 
-/** Um só toque: marca a marcação como concluída e regista a data de hoje
- * como data do serviço (reaproveitando criarServico, a mesma função usada
- * por "Registar serviço" e pelo botão "Pago" — nunca duplica a escrita
- * da data). Sem orçamento, o valor fica "por confirmar". */
-export async function marcarServicoFeitoAction(marcacaoId: string): Promise<EstadoAcaoMarcacao> {
+/** Um só toque: marca a marcação como concluída, regista a data de hoje
+ * como data do serviço e confirma o pagamento — tudo ao mesmo tempo, para
+ * não obrigar a passar por dois sítios diferentes. Reaproveita
+ * criarServico/marcarFaturacaoPaga, as mesmas funções usadas por
+ * "Registar serviço" e pelo botão "Pago" em Pedidos — nunca duplica a
+ * escrita da data nem do valor. */
+export async function marcarMarcacaoPagaAction(marcacaoId: string, valor: number): Promise<EstadoAcaoMarcacao> {
+  if (!valor || valor <= 0) return { erro: "Indica um valor válido." };
+
   const detalheMarcacao = await obterMarcacaoComDetalhe(marcacaoId);
   if (!detalheMarcacao) return { erro: "Marcação não encontrada." };
   const { pedido, cliente, viatura } = detalheMarcacao;
@@ -65,9 +70,9 @@ export async function marcarServicoFeitoAction(marcacaoId: string): Promise<Esta
   const servicoDestaMarcacao = detalhePedido?.servicos.find((s) => s.marcacao_id === marcacaoId) ?? null;
 
   if (servicoDestaMarcacao) {
+    await marcarFaturacaoPaga(servicoDestaMarcacao.id, valor);
     await atualizarEstadoMarcacao(marcacaoId, "concluido");
   } else {
-    const ultimoOrcamento = detalhePedido?.orcamentos[0] ?? null;
     await criarServico(
       {
         pedido_id: pedido.id,
@@ -75,13 +80,13 @@ export async function marcarServicoFeitoAction(marcacaoId: string): Promise<Esta
         viatura_id: viatura.id,
         cliente_id: cliente.id,
         data_conclusao: new Date().toISOString().slice(0, 10),
-        preco_final: ultimoOrcamento ? Number(ultimoOrcamento.preco_entrada) : 0,
+        preco_final: valor,
         custo_produtos: 0,
         tempo_execucao_min: null,
         tempo_deslocacao_min: 0,
         notas_incidentes: null,
       },
-      { valorPorConfirmar: !ultimoOrcamento }
+      { pago: true }
     );
   }
 

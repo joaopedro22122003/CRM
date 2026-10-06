@@ -58,8 +58,6 @@ export async function marcarFaturacaoPaga(servicoId: string, valor: number): Pro
       valor,
       estado: "pago",
       data_pagamento: new Date().toISOString().slice(0, 10),
-      // Um valor real acabou de ser confirmado — deixa de estar "por confirmar".
-      valor_por_confirmar: false,
     })
     .eq("servico_id", servicoId);
   if (error) throw error;

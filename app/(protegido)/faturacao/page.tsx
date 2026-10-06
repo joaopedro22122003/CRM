@@ -8,12 +8,8 @@ import { formatarEuros } from "@/lib/pricing";
 export default async function FaturacaoPage() {
   const [registos, despesas] = await Promise.all([listarFaturacao(), listarDespesas()]);
 
-  const totalRecebido = registos
-    .filter((r) => r.estado === "pago" && !r.valor_por_confirmar)
-    .reduce((s, r) => s + Number(r.valor), 0);
-  const totalPendente = registos
-    .filter((r) => r.estado === "pendente" && !r.valor_por_confirmar)
-    .reduce((s, r) => s + Number(r.valor), 0);
+  const totalRecebido = registos.filter((r) => r.estado === "pago").reduce((s, r) => s + Number(r.valor), 0);
+  const totalPendente = registos.filter((r) => r.estado === "pendente").reduce((s, r) => s + Number(r.valor), 0);
   const totalDespesas = despesas.reduce((s, d) => s + Number(d.valor), 0);
   const lucro = totalRecebido - totalDespesas;
 
@@ -65,12 +61,7 @@ export default async function FaturacaoPage() {
                   <Link href={`/servicos/${r.servico.id}`} className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-neutral-900">{r.servico.cliente.nome}</p>
                     <p className="text-sm text-neutral-500">
-                      {new Date(r.servico.data_conclusao).toLocaleDateString("pt-PT")} ·{" "}
-                      {r.valor_por_confirmar ? (
-                        <span className="font-medium text-amber-700">Valor por confirmar</span>
-                      ) : (
-                        formatarEuros(Number(r.valor))
-                      )}
+                      {new Date(r.servico.data_conclusao).toLocaleDateString("pt-PT")} · {formatarEuros(Number(r.valor))}
                     </p>
                     {r.orcamento && (
                       <p className="truncate text-xs text-neutral-400">
@@ -80,9 +71,7 @@ export default async function FaturacaoPage() {
                       </p>
                     )}
                   </Link>
-                  {r.valor_por_confirmar ? (
-                    <Badge cor="amarelo">Valor por confirmar</Badge>
-                  ) : r.estado === "pago" ? (
+                  {r.estado === "pago" ? (
                     <Badge cor="verde">Pago</Badge>
                   ) : (
                     <form action={mudarEstadoFaturacaoAction}>
