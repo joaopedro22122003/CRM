@@ -16,9 +16,14 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
 
   const { marcacao, pedido, cliente, viatura } = detalhe;
   const dataHora = new Date(marcacao.data_hora);
-  const clienteNovo = !(await clienteTemOutrosPedidos(cliente.id, pedido.id));
-  const estadoPagamento = await obterEstadoPagamentoDaMarcacao(marcacao.id);
+
+  const [temOutrosPedidos, estadoPagamento] = await Promise.all([
+    clienteTemOutrosPedidos(cliente.id, pedido.id),
+    obterEstadoPagamentoDaMarcacao(marcacao.id),
+  ]);
+  const clienteNovo = !temOutrosPedidos;
   const jaPago = estadoPagamento === "pago";
+  const temServico = estadoPagamento !== null;
 
   return (
     <>
@@ -77,11 +82,13 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
           </div>
         </Cartao>
 
-        {!jaPago && <BotaoLink href="/pedidos">Ir a Pedidos para marcar como pago</BotaoLink>}
+        {!jaPago && <BotaoLink href={`/pedidos/${pedido.id}`}>Ir ao pedido para marcar como pago</BotaoLink>}
 
-        <BotaoLink variante="secundario" href={`/servicos/novo?pedido_id=${pedido.id}&marcacao_id=${marcacao.id}`}>
-          Registar serviço com mais detalhe (fotos, custos…)
-        </BotaoLink>
+        {!temServico && (
+          <BotaoLink variante="secundario" href={`/servicos/novo?pedido_id=${pedido.id}&marcacao_id=${marcacao.id}`}>
+            Registar serviço com mais detalhe (fotos, custos…)
+          </BotaoLink>
+        )}
       </div>
     </>
   );

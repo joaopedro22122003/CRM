@@ -3,10 +3,18 @@ import { notFound } from "next/navigation";
 import { PageHeader, Cartao, BotaoLink, Badge, Select, Botao } from "@/components/ui";
 import { obterPedidoComDetalhe } from "@/lib/data/pedidos";
 import { listarViaturasDoCliente } from "@/lib/data/viaturas";
+import { obterEstadoPagamentoDoServico } from "@/lib/data/faturacao";
 import { mudarEstadoAction, associarViaturaAction } from "../actions";
-import { ESTADOS_PEDIDO, ROTULOS_PACOTE } from "@/lib/types";
+import { ESTADOS_PEDIDO, ROTULOS_PACOTE, type EstadoMarcacao } from "@/lib/types";
 import { formatarEuros } from "@/lib/pricing";
 import { linkWhatsApp } from "@/lib/whatsapp";
+import BotaoPago from "../BotaoPago";
+
+const ROTULOS_ESTADO_MARCACAO: Record<EstadoMarcacao, string> = {
+  agendado: "Agendado",
+  concluido: "Concluído",
+  cancelado: "Cancelado",
+};
 
 export default async function PedidoDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,7 +22,18 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<{ 
   if (!detalhe) notFound();
 
   const { pedido, cliente, viatura, orcamentos, marcacoes, servicos } = detalhe;
-  const viaturasDoCliente = viatura ? [] : await listarViaturasDoCliente(cliente.id);
+
+  const [viaturasDoCliente, estadoPagamento] = await Promise.all([
+    viatura ? Promise.resolve([]) : listarViaturasDoCliente(cliente.id),
+    servicos[0] ? obterEstadoPagamentoDoServico(servicos[0].id) : Promise.resolve(null),
+  ]);
+
+  const jaPago = estadoPagamento === "pago";
+  const valorSugerido = orcamentos[0]
+    ? Number(orcamentos[0].preco_entrada)
+    : servicos[0]
+      ? Number(servicos[0].preco_final)
+      : null;
 
   return (
     <>
@@ -81,6 +100,19 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<{ 
           </form>
         </Cartao>
 
+        {jaPago ? (
+          <Cartao className="flex items-center justify-center gap-2 border-brand bg-brand-50 py-3">
+            <Badge cor="verde">Pago</Badge>
+          </Cartao>
+        ) : (
+          <BotaoPago
+            pedidoId={pedido.id}
+            valorSugerido={valorSugerido}
+            temViatura={viatura !== null}
+            tamanho="grande"
+          />
+        )}
+
         <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-neutral-900">Orçamentos</h2>
@@ -127,7 +159,7 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<{ 
                     <Cartao className="flex items-center justify-between active:bg-neutral-50">
                       <span>{new Date(m.data_hora).toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" })}</span>
                       <Badge cor={m.estado === "concluido" ? "verde" : m.estado === "cancelado" ? "vermelho" : "azul"}>
-                        {m.estado}
+                        {ROTULOS_ESTADO_MARCACAO[m.estado]}
                       </Badge>
                     </Cartao>
                   </Link>
@@ -140,9 +172,11 @@ export default async function PedidoDetalhePage({ params }: { params: Promise<{ 
         <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-neutral-900">Serviços</h2>
-            <Link href={`/servicos/novo?pedido_id=${pedido.id}`} className="text-sm font-semibold text-neutral-600">
-              + Registar serviço
-            </Link>
+            {servicos.length === 0 && (
+              <Link href={`/servicos/novo?pedido_id=${pedido.id}`} className="text-sm font-semibold text-neutral-600">
+                + Registar serviço
+              </Link>
+            )}
           </div>
           {servicos.length === 0 ? (
             <p className="text-sm text-neutral-500">Ainda sem serviço registado.</p>

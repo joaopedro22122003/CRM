@@ -61,15 +61,16 @@ export async function cancelarMarcacaoAction(marcacaoId: string): Promise<Estado
   const detalhe = await obterMarcacaoComDetalhe(marcacaoId);
   if (!detalhe) return { erro: "Marcação não encontrada." };
 
-  const resultado = await desfazerServicoDaMarcacao(marcacaoId);
+  const [resultado, temOutrosPedidos] = await Promise.all([
+    desfazerServicoDaMarcacao(marcacaoId),
+    clienteTemOutrosPedidos(detalhe.cliente.id, detalhe.pedido.id),
+  ]);
   if (resultado === "bloqueado_pago") {
     return {
       erro:
         "Este serviço já tem um pagamento confirmado — reverte o pagamento em Faturação antes de cancelar esta marcação.",
     };
   }
-
-  const temOutrosPedidos = await clienteTemOutrosPedidos(detalhe.cliente.id, detalhe.pedido.id);
 
   if (temOutrosPedidos) {
     await apagarMarcacao(marcacaoId);

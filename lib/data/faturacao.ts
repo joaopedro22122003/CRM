@@ -34,6 +34,16 @@ export async function obterEstadoPagamentoDaMarcacao(marcacaoId: string): Promis
   return (faturacao?.estado as EstadoFaturacao) ?? null;
 }
 
+/** Estado do pagamento de um serviço específico, se já tiver faturação
+ * criada — usado para decidir se ainda faz sentido mostrar ações de
+ * pagamento/criação de serviço num pedido. */
+export async function obterEstadoPagamentoDoServico(servicoId: string): Promise<EstadoFaturacao | null> {
+  const supabase = criarClienteSupabase();
+  const { data, error } = await supabase.from("faturacao").select("estado").eq("servico_id", servicoId).maybeSingle();
+  if (error) throw error;
+  return (data?.estado as EstadoFaturacao) ?? null;
+}
+
 export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
   const supabase = criarClienteSupabase();
 
@@ -73,7 +83,9 @@ export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
 
 /** Confirma o pagamento de um serviço, com o valor e a forma de
  * pagamento que o cliente efetivamente usou (pode diferir do preço
- * orçamentado). */
+ * orçamentado). Atualiza também o preço no próprio serviço, para o
+ * "Total gasto" do cliente e a margem/lucro-hora nunca ficarem
+ * desencontrados do valor realmente confirmado aqui. */
 export async function marcarFaturacaoPaga(
   servicoId: string,
   valor: number,
@@ -90,6 +102,12 @@ export async function marcarFaturacaoPaga(
     })
     .eq("servico_id", servicoId);
   if (error) throw error;
+
+  const { error: erroServico } = await supabase
+    .from("servicos")
+    .update({ preco_final: valor })
+    .eq("id", servicoId);
+  if (erroServico) throw erroServico;
 }
 
 /** Corrige só o estado (pago/pendente) de uma faturação já criada — a

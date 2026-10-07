@@ -7,6 +7,9 @@ export interface MarcacaoResumo extends Marcacao {
     cliente: Pick<Cliente, "id" | "nome" | "telefone">;
     viatura: Pick<Viatura, "id" | "marca" | "modelo"> | null;
   };
+  /** Vem embutido só nalgumas listagens (ver listarTodasMarcacoes) —
+   * usado para mostrar "Pago" sem ter de abrir a marcação. */
+  servicos?: { faturacao: { estado: string } | { estado: string }[] | null }[];
 }
 
 export async function listarMarcacoesEntre(inicioIso: string, fimIso: string): Promise<MarcacaoResumo[]> {
@@ -28,7 +31,9 @@ export async function listarTodasMarcacoes(): Promise<MarcacaoResumo[]> {
   const supabase = criarClienteSupabase();
   const { data, error } = await supabase
     .from("marcacoes")
-    .select("*, pedido:pedidos(id, cliente:clientes(id, nome, telefone), viatura:viaturas(id, marca, modelo))")
+    .select(
+      "*, pedido:pedidos(id, cliente:clientes(id, nome, telefone), viatura:viaturas(id, marca, modelo)), servicos(faturacao(estado))"
+    )
     .order("data_hora");
   if (error) throw error;
   return (data ?? []) as unknown as MarcacaoResumo[];

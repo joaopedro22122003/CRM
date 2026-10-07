@@ -58,6 +58,20 @@ export default async function NovoServicoPage({
     );
   }
 
+  if (detalhe.servicos.length > 0) {
+    return (
+      <>
+        <PageHeader titulo="Registar serviço" voltarPara={`/pedidos/${pedido_id}`} />
+        <div className="p-4">
+          <EstadoVazio
+            titulo="Este pedido já tem um serviço registado"
+            descricao="Abre o pedido para ver ou corrigir o serviço existente."
+          />
+        </div>
+      </>
+    );
+  }
+
   const ultimoOrcamento = detalhe.orcamentos[0];
 
   return (

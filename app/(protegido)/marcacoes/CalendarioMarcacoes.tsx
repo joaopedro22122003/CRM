@@ -7,6 +7,7 @@ import { pt } from "date-fns/locale";
 import CalendarioMes from "@/components/CalendarioMes";
 import { Cartao, Badge, BotaoLink, EstadoVazio } from "@/components/ui";
 import type { MarcacaoResumo } from "@/lib/data/marcacoes";
+import { marcacaoEstaPaga } from "@/lib/marcacoes-helpers";
 
 export default function CalendarioMarcacoes({ marcacoes }: { marcacoes: MarcacaoResumo[] }) {
   const hoje = new Date();
@@ -62,9 +63,12 @@ export default function CalendarioMarcacoes({ marcacoes }: { marcacoes: Marcacao
                         {m.tipo === "recolha_entrega" && m.zona ? ` · ${m.zona}` : ""}
                       </p>
                     </div>
-                    <Badge cor={m.tipo === "recolha_entrega" ? "roxo" : "cinza"}>
-                      {m.tipo === "recolha_entrega" ? "Recolha" : "Cliente traz"}
-                    </Badge>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge cor={m.tipo === "recolha_entrega" ? "roxo" : "cinza"}>
+                        {m.tipo === "recolha_entrega" ? "Recolha" : "Cliente traz"}
+                      </Badge>
+                      {marcacaoEstaPaga(m) && <Badge cor="verde">Pago</Badge>}
+                    </div>
                   </Cartao>
                 </Link>
               </li>

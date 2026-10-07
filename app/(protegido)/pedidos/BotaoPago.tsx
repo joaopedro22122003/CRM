@@ -9,10 +9,12 @@ export default function BotaoPago({
   pedidoId,
   valorSugerido,
   temViatura,
+  tamanho = "pequeno",
 }: {
   pedidoId: string;
   valorSugerido: number | null;
   temViatura: boolean;
+  tamanho?: "pequeno" | "grande";
 }) {
   const [aberto, setAberto] = useState(false);
   const [valor, setValor] = useState(valorSugerido !== null ? valorSugerido.toFixed(2) : "");
@@ -48,9 +50,13 @@ export default function BotaoPago({
       <button
         type="button"
         onClick={abrir}
-        className="rounded-full border border-brand px-3 py-1 text-xs font-semibold text-brand active:bg-brand-50"
+        className={
+          tamanho === "grande"
+            ? "w-full rounded-xl bg-brand px-4 py-3 text-center text-base font-semibold text-white active:bg-brand-dark"
+            : "rounded-full border border-brand px-3 py-1 text-xs font-semibold text-brand active:bg-brand-50"
+        }
       >
-        Pago
+        {tamanho === "grande" ? "Marcar como pago" : "Pago"}
       </button>
 
       {aberto && (
@@ -112,7 +118,7 @@ export default function BotaoPago({
                 onClick={() => setAberto(false)}
                 className="flex-1 rounded-xl bg-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-700 active:bg-neutral-300"
               >
-                Cancelar
+                Voltar
               </button>
               <button
                 type="button"
