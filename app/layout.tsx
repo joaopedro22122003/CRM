@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import RegistoServiceWorker from "@/components/RegistoServiceWorker";
 
 export const metadata: Metadata = {
   title: "Garagem do Jota",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-PT" className="h-full">
       <body className="flex min-h-dvh flex-col antialiased">
+        <RegistoServiceWorker />
         <div className="flex-1 pb-20">{children}</div>
         <BottomNav />
       </body>

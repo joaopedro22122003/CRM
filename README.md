@@ -66,6 +66,42 @@ vou-te guiando em tempo real por estes passos.
 5. A partir daí passas a ter um ícone da app, como se fosse uma app
    normal — sem precisares de abrir o Safari.
 
+## Parte 4 — Lembretes das marcações (notificação da véspera)
+
+Todos os dias por volta das 18h (hora de Lisboa; no inverno pode chegar
+uns minutos mais cedo, limitação do plano gratuito), se houver alguma
+marcação para o dia seguinte, chega uma notificação ao telemóvel. Ao
+tocar nela, abre a lista dos clientes de amanhã, cada um já com um
+botão para abrir o WhatsApp com a mensagem de confirmação escrita.
+
+1. Em **Vercel → o teu projeto → Settings → Environment Variables**,
+   adiciona estas quatro variáveis (valores já gerados, prontos a
+   colar):
+
+   | Nome | Valor |
+   |---|---|
+   | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | `BGXgV5AhCdsoDd6lspeiq4nv0oZp0093MYpYjczMOSiAFKayrzaWYaOgW2WYvJcXXWwdFfNI0iOT7dywBedhYp8` |
+   | `VAPID_PRIVATE_KEY` | `hn5S1fzUGcwTM-oKQL4uGPAIs9Ro4l8SzCQ2EQzrBSo` |
+   | `VAPID_SUBJECT` | `mailto:henriquejoaoclaude@gmail.com` |
+   | `CRON_SECRET` | `33637ee10f5117cc92bbcf390f19dec79fb66e781e670efc` |
+
+   Depois de adicionar, volta a publicar o projeto (Vercel →
+   Deployments → ⋯ → Redeploy) para as variáveis novas entrarem em
+   vigor.
+2. No **SQL Editor** do Supabase, corre o ficheiro
+   `supabase/migrations/0007_push_subscriptions.sql` (mesmo processo da
+   Parte 1).
+3. No iPhone, se ainda não o tiveste feito: adiciona a app ao ecrã
+   principal (ver Parte 3) — as notificações push só funcionam numa app
+   já instalada no ecrã principal, não dentro do Safari.
+4. Abre a app a partir do ícone no ecrã principal, vai a **Mais →
+   Lembretes**, toca em **Ativar lembretes** e aceita o pedido de
+   permissão.
+5. Toca em **Testar agora** — devia chegar logo uma notificação de
+   teste. Se chegar, está tudo a funcionar; a partir daí recebes
+   sozinho a notificação real todos os dias às 18h, sempre que houver
+   marcações no dia seguinte.
+
 ---
 
 ## Como mudar preços mais tarde
@@ -97,5 +133,7 @@ automaticamente a seguir a guardares).
   contas de utilizador — ver `middleware.ts` e `lib/auth.ts`.
 - Fotos de antes/depois ficam no Supabase Storage, no balde
   `fotos-servicos`.
-- P1 por construir a seguir: dashboard de rentabilidade e lembretes de
-  clientes a reativar.
+- Lembretes da véspera: `app/api/cron/lembrete-vespera/route.ts`
+  (chamado 1x/dia pela Vercel, ver `vercel.json`) + `lib/data/push.ts`
+  (envio via `web-push`) + `public/sw.js` (Service Worker no
+  telemóvel).
