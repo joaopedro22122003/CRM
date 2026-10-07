@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { PageHeader, Cartao, BotaoLink } from "@/components/ui";
+import { PageHeader, Cartao, BotaoLink, Badge } from "@/components/ui";
 import { obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
 import { clienteTemOutrosPedidos } from "@/lib/data/clientes";
+import { obterEstadoPagamentoDaMarcacao } from "@/lib/data/faturacao";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import AcoesMarcacao from "../AcoesMarcacao";
 
@@ -16,6 +17,8 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
   const { marcacao, pedido, cliente, viatura } = detalhe;
   const dataHora = new Date(marcacao.data_hora);
   const clienteNovo = !(await clienteTemOutrosPedidos(cliente.id, pedido.id));
+  const estadoPagamento = await obterEstadoPagamentoDaMarcacao(marcacao.id);
+  const jaPago = estadoPagamento === "pago";
 
   return (
     <>
@@ -37,9 +40,12 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
             </a>
           </div>
 
-          <p className="text-sm text-neutral-600">
-            {viatura ? `${viatura.marca} ${viatura.modelo}` : "Sem viatura associada"}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-neutral-600">
+              {viatura ? `${viatura.marca} ${viatura.modelo}` : "Sem viatura associada"}
+            </p>
+            {jaPago && <Badge cor="verde">Pago</Badge>}
+          </div>
 
           <div className="flex flex-col gap-1 border-t border-neutral-100 pt-3 text-sm">
             <p>
@@ -71,7 +77,7 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
           </div>
         </Cartao>
 
-        <BotaoLink href="/pedidos">Ir a Pedidos para marcar como pago</BotaoLink>
+        {!jaPago && <BotaoLink href="/pedidos">Ir a Pedidos para marcar como pago</BotaoLink>}
 
         <BotaoLink variante="secundario" href={`/servicos/novo?pedido_id=${pedido.id}&marcacao_id=${marcacao.id}`}>
           Registar serviço com mais detalhe (fotos, custos…)

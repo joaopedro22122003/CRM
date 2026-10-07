@@ -11,6 +11,29 @@ export interface FaturacaoResumo extends Faturacao {
   orcamento: ResumoOrcamento | null;
 }
 
+/** Estado do pagamento do serviço ligado a esta marcação, se existir —
+ * usado para esconder ações de pagamento já tratadas (ex.: o atalho
+ * "marcar como pago" no ecrã da marcação). */
+export async function obterEstadoPagamentoDaMarcacao(marcacaoId: string): Promise<EstadoFaturacao | null> {
+  const supabase = criarClienteSupabase();
+
+  const { data: servico, error: erroServico } = await supabase
+    .from("servicos")
+    .select("id")
+    .eq("marcacao_id", marcacaoId)
+    .maybeSingle();
+  if (erroServico) throw erroServico;
+  if (!servico) return null;
+
+  const { data: faturacao, error } = await supabase
+    .from("faturacao")
+    .select("estado")
+    .eq("servico_id", servico.id)
+    .maybeSingle();
+  if (error) throw error;
+  return (faturacao?.estado as EstadoFaturacao) ?? null;
+}
+
 export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
   const supabase = criarClienteSupabase();
 
