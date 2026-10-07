@@ -63,9 +63,8 @@ export async function criarServicoAction(_estado: EstadoFormulario, formData: Fo
 export async function mudarEstadoFaturacaoAction(formData: FormData): Promise<void> {
   const faturacaoId = String(formData.get("faturacao_id") ?? "");
   const estado = String(formData.get("estado") ?? "") as "pago" | "pendente";
-  const metodoPagamento = String(formData.get("metodo_pagamento") ?? "").trim() || null;
   if (!faturacaoId || !estado) return;
 
-  await atualizarEstadoFaturacao(faturacaoId, estado, metodoPagamento);
+  await atualizarEstadoFaturacao(faturacaoId, estado);
   revalidatePath("/faturacao");
 }

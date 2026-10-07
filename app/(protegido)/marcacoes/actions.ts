@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { criarMarcacao, atualizarEstadoMarcacao, obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
+import { criarMarcacao, obterMarcacaoComDetalhe, apagarMarcacao } from "@/lib/data/marcacoes";
+import { atualizarEstadoPedido } from "@/lib/data/pedidos";
+import { apagarCliente, clienteTemOutrosPedidos } from "@/lib/data/clientes";
 import { desfazerServicoDaMarcacao } from "@/lib/data/servicos";
 import type { TipoMarcacao } from "@/lib/types";
 
@@ -50,6 +52,11 @@ function revalidarTudo(marcacaoId: string, pedidoId: string) {
   revalidatePath("/para-contactar");
 }
 
+/** Cancela a marcação apagando mesmo os dados — nunca fica um "cancelado"
+ * pendurado. Se o cliente não tiver mais nenhum pedido (foi criado só
+ * para esta marcação e nunca chegou a vir), apaga o cliente todo. Se já
+ * tiver histórico, apaga só esta marcação. Nunca mexe em nada que já
+ * tenha um pagamento confirmado. */
 export async function cancelarMarcacaoAction(marcacaoId: string): Promise<EstadoAcaoMarcacao> {
   const detalhe = await obterMarcacaoComDetalhe(marcacaoId);
   if (!detalhe) return { erro: "Marcação não encontrada." };
@@ -62,24 +69,16 @@ export async function cancelarMarcacaoAction(marcacaoId: string): Promise<Estado
     };
   }
 
-  await atualizarEstadoMarcacao(marcacaoId, "cancelado");
-  revalidarTudo(marcacaoId, detalhe.pedido.id);
-  return {};
-}
+  const temOutrosPedidos = await clienteTemOutrosPedidos(detalhe.cliente.id, detalhe.pedido.id);
 
-export async function reverterParaAgendadoAction(marcacaoId: string): Promise<EstadoAcaoMarcacao> {
-  const detalhe = await obterMarcacaoComDetalhe(marcacaoId);
-  if (!detalhe) return { erro: "Marcação não encontrada." };
-
-  const resultado = await desfazerServicoDaMarcacao(marcacaoId);
-  if (resultado === "bloqueado_pago") {
-    return {
-      erro:
-        "Este serviço já tem um pagamento confirmado — reverte o pagamento em Faturação antes de reverter esta marcação.",
-    };
+  if (temOutrosPedidos) {
+    await apagarMarcacao(marcacaoId);
+    await atualizarEstadoPedido(detalhe.pedido.id, "orcamentado");
+  } else {
+    await apagarCliente(detalhe.cliente.id);
   }
 
-  await atualizarEstadoMarcacao(marcacaoId, "agendado");
   revalidarTudo(marcacaoId, detalhe.pedido.id);
+  revalidatePath("/clientes");
   return {};
 }

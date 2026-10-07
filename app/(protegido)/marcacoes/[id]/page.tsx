@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { PageHeader, Cartao, BotaoLink } from "@/components/ui";
 import { obterMarcacaoComDetalhe } from "@/lib/data/marcacoes";
+import { clienteTemOutrosPedidos } from "@/lib/data/clientes";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import AcoesMarcacao from "../AcoesMarcacao";
 
@@ -14,6 +15,7 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
 
   const { marcacao, pedido, cliente, viatura } = detalhe;
   const dataHora = new Date(marcacao.data_hora);
+  const clienteNovo = !(await clienteTemOutrosPedidos(cliente.id, pedido.id));
 
   return (
     <>
@@ -65,7 +67,7 @@ export default async function MarcacaoDetalhePage({ params }: { params: Promise<
           </div>
 
           <div className="border-t border-neutral-100 pt-3">
-            <AcoesMarcacao marcacaoId={marcacao.id} estadoAtual={marcacao.estado} />
+            <AcoesMarcacao marcacaoId={marcacao.id} clienteNovo={clienteNovo} />
           </div>
         </Cartao>
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageHeader, Cartao, Badge, Select, Input, Botao } from "@/components/ui";
+import { PageHeader, Cartao, Badge, Select, Botao } from "@/components/ui";
 import { obterServicoComDetalhe } from "@/lib/data/servicos";
 import { mudarEstadoFaturacaoAction } from "../actions";
 import { formatarEuros } from "@/lib/pricing";
@@ -69,22 +69,17 @@ export default async function ServicoDetalhePage({ params }: { params: Promise<{
                 {faturacao.estado === "pago" ? "Pago" : "Pendente"}
               </Badge>
             </div>
-            <form action={mudarEstadoFaturacaoAction} className="flex flex-col gap-2">
+            {faturacao.metodo_pagamento && (
+              <p className="text-sm text-neutral-600">Forma de pagamento: {faturacao.metodo_pagamento}</p>
+            )}
+            <form action={mudarEstadoFaturacaoAction} className="flex gap-2">
               <input type="hidden" name="faturacao_id" value={faturacao.id} />
-              <div className="flex gap-2">
-                <Select name="estado" defaultValue={faturacao.estado} className="flex-1">
-                  <option value="pendente">Pendente</option>
-                  <option value="pago">Pago</option>
-                </Select>
-                <Input
-                  name="metodo_pagamento"
-                  defaultValue={faturacao.metodo_pagamento ?? ""}
-                  placeholder="MBWay, transferência…"
-                  className="flex-1"
-                />
-              </div>
-              <Botao variante="secundario" className="w-full text-sm">
-                Atualizar pagamento
+              <Select name="estado" defaultValue={faturacao.estado} className="flex-1">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </Select>
+              <Botao variante="secundario" className="shrink-0 px-3 py-2 text-sm">
+                Atualizar
               </Botao>
             </form>
           </Cartao>

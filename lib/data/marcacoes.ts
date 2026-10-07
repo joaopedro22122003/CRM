@@ -87,3 +87,11 @@ export async function atualizarEstadoMarcacao(id: string, estado: EstadoMarcacao
   const { error } = await supabase.from("marcacoes").update({ estado }).eq("id", id);
   if (error) throw error;
 }
+
+/** Apaga só esta marcação (usado ao cancelar uma marcação de um cliente
+ * que já tem histórico — o cliente e o pedido mantêm-se). */
+export async function apagarMarcacao(id: string): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase.from("marcacoes").delete().eq("id", id);
+  if (error) throw error;
+}

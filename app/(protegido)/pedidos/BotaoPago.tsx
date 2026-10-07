@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { marcarPedidoPagoAction } from "./actions";
 
+const FORMAS_PAGAMENTO = ["Dinheiro", "MBWay"] as const;
+
 export default function BotaoPago({
   pedidoId,
   valorSugerido,
@@ -14,6 +16,7 @@ export default function BotaoPago({
 }) {
   const [aberto, setAberto] = useState(false);
   const [valor, setValor] = useState(valorSugerido !== null ? valorSugerido.toFixed(2) : "");
+  const [metodoPagamento, setMetodoPagamento] = useState<(typeof FORMAS_PAGAMENTO)[number]>("Dinheiro");
   const [erro, setErro] = useState<string | null>(null);
   const [aGuardar, iniciarTransicao] = useTransition();
 
@@ -31,7 +34,7 @@ export default function BotaoPago({
       return;
     }
     iniciarTransicao(async () => {
-      const resultado = await marcarPedidoPagoAction(pedidoId, numero);
+      const resultado = await marcarPedidoPagoAction(pedidoId, numero, metodoPagamento);
       if (resultado?.erro) {
         setErro(resultado.erro);
         return;
@@ -60,7 +63,7 @@ export default function BotaoPago({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-base font-semibold text-neutral-900">Confirmar pagamento</h2>
-            <p className="mt-1 text-sm text-neutral-500">Quanto é que o cliente pagou?</p>
+            <p className="mt-1 text-sm text-neutral-500">Quanto é que o cliente pagou, e como?</p>
 
             <label className="mt-4 flex flex-col gap-1.5">
               <span className="text-sm font-medium text-neutral-700">Valor pago (€)</span>
@@ -75,6 +78,26 @@ export default function BotaoPago({
                 className="w-full rounded-xl border border-neutral-300 bg-neutral-50 px-3.5 py-2.5 text-base text-neutral-900 focus:border-brand focus:outline-none"
               />
             </label>
+
+            <div className="mt-4 flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-neutral-700">Forma de pagamento</span>
+              <div className="grid grid-cols-2 gap-2">
+                {FORMAS_PAGAMENTO.map((forma) => (
+                  <button
+                    key={forma}
+                    type="button"
+                    onClick={() => setMetodoPagamento(forma)}
+                    className={`rounded-xl border px-3 py-2.5 text-sm font-medium ${
+                      metodoPagamento === forma
+                        ? "border-brand bg-brand-50 text-brand-300"
+                        : "border-neutral-300 text-neutral-700"
+                    }`}
+                  >
+                    {forma}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {!temViatura && (
               <p className="mt-2 text-sm text-amber-700">

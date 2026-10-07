@@ -101,6 +101,20 @@ export async function apagarCliente(id: string): Promise<void> {
   if (error) throw error;
 }
 
+/** Verifica se o cliente tem algum pedido além deste — usado para
+ * distinguir um cliente novo (criado só para esta marcação, sem mais
+ * nenhum histórico) de um cliente que já cá tinha vindo antes. */
+export async function clienteTemOutrosPedidos(clienteId: string, pedidoIdAtual: string): Promise<boolean> {
+  const supabase = criarClienteSupabase();
+  const { count, error } = await supabase
+    .from("pedidos")
+    .select("id", { count: "exact", head: true })
+    .eq("cliente_id", clienteId)
+    .neq("id", pedidoIdAtual);
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}
+
 /** Regista que o cliente foi contactado hoje (ex.: lembrete de
  * manutenção via WhatsApp) — nunca apaga o cliente, só grava a data. */
 export async function marcarClienteContactado(id: string): Promise<void> {

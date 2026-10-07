@@ -48,32 +48,36 @@ export async function listarFaturacao(): Promise<FaturacaoResumo[]> {
   return registos.map((r) => ({ ...r, orcamento: mapaOrcamentos.get(r.servico.pedido_id) ?? null }));
 }
 
-/** Confirma o pagamento de um serviço, com o valor que o cliente
- * efetivamente pagou (pode diferir do preço orçamentado). */
-export async function marcarFaturacaoPaga(servicoId: string, valor: number): Promise<void> {
-  const supabase = criarClienteSupabase();
-  const { error } = await supabase
-    .from("faturacao")
-    .update({
-      valor,
-      estado: "pago",
-      data_pagamento: new Date().toISOString().slice(0, 10),
-    })
-    .eq("servico_id", servicoId);
-  if (error) throw error;
-}
-
-export async function atualizarEstadoFaturacao(
-  id: string,
-  estado: EstadoFaturacao,
+/** Confirma o pagamento de um serviço, com o valor e a forma de
+ * pagamento que o cliente efetivamente usou (pode diferir do preço
+ * orçamentado). */
+export async function marcarFaturacaoPaga(
+  servicoId: string,
+  valor: number,
   metodoPagamento: string | null
 ): Promise<void> {
   const supabase = criarClienteSupabase();
   const { error } = await supabase
     .from("faturacao")
     .update({
-      estado,
+      valor,
+      estado: "pago",
       metodo_pagamento: metodoPagamento,
+      data_pagamento: new Date().toISOString().slice(0, 10),
+    })
+    .eq("servico_id", servicoId);
+  if (error) throw error;
+}
+
+/** Corrige só o estado (pago/pendente) de uma faturação já criada — a
+ * forma de pagamento fica sempre a que foi escolhida no botão "Pago" em
+ * Pedidos, não se mexe aqui. */
+export async function atualizarEstadoFaturacao(id: string, estado: EstadoFaturacao): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("faturacao")
+    .update({
+      estado,
       data_pagamento: estado === "pago" ? new Date().toISOString().slice(0, 10) : null,
     })
     .eq("id", id);

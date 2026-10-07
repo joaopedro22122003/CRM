@@ -48,10 +48,12 @@ export async function associarViaturaAction(formData: FormData): Promise<void> {
 
 /** Confirma o pagamento de um pedido a partir da lista — cria o serviço
  * se ainda não existir (atalho ao registo completo) ou só atualiza a
- * faturação já existente, com o valor que o cliente efetivamente pagou. */
+ * faturação já existente, com o valor e a forma de pagamento que o
+ * cliente efetivamente usou. */
 export async function marcarPedidoPagoAction(
   pedidoId: string,
-  valor: number
+  valor: number,
+  metodoPagamento: string | null
 ): Promise<{ erro?: string }> {
   if (!pedidoId || !valor || valor <= 0) return { erro: "Indica um valor válido." };
 
@@ -62,7 +64,7 @@ export async function marcarPedidoPagoAction(
   const servicoExistente = detalhe.servicos[0] ?? null;
 
   if (servicoExistente) {
-    await marcarFaturacaoPaga(servicoExistente.id, valor);
+    await marcarFaturacaoPaga(servicoExistente.id, valor, metodoPagamento);
   } else {
     const marcacaoRecente = detalhe.marcacoes[0] ?? null;
     await criarServico(
@@ -78,7 +80,7 @@ export async function marcarPedidoPagoAction(
         tempo_deslocacao_min: 0,
         notas_incidentes: null,
       },
-      { pago: true }
+      { pago: true, metodoPagamento }
     );
   }
 
