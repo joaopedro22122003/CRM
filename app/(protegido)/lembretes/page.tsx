@@ -18,19 +18,6 @@ export default function LembretesPage() {
           </p>
         </Cartao>
 
-        <Cartao className="flex flex-col gap-2 border-amber-300 bg-amber-50">
-          <p className="font-semibold text-amber-900">Antes de ativares, no iPhone</p>
-          <ol className="list-decimal space-y-1 pl-4 text-sm text-amber-800">
-            <li>Abre esta app no Safari (se ainda não a tiveres aberto assim).</li>
-            <li>
-              Toca no botão de partilhar (o quadrado com a seta para cima) e escolhe{" "}
-              <strong>&quot;Adicionar ao Ecrã Principal&quot;</strong>.
-            </li>
-            <li>Fecha o Safari e abre a app a partir do novo ícone no ecrã principal.</li>
-            <li>Só a partir daí é que o botão abaixo consegue ativar os lembretes.</li>
-          </ol>
-        </Cartao>
-
         <BotaoAtivarLembretes chavePublica={chavePublica} />
       </div>
     </>

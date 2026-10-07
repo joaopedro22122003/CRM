@@ -113,51 +113,76 @@ export default function BotaoAtivarLembretes({ chavePublica }: { chavePublica: s
 
   if (estado === "a_verificar") return null;
 
+  const mostrarGuiaIphone = estado === "nao_suportado" || estado === "desativado";
+
   if (estado === "nao_suportado") {
     return (
-      <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-        Este navegador/aparelho não suporta notificações. No iPhone, confirma que abriste a app a partir do ícone
-        no ecrã principal (não do Safari) e que o iOS está atualizado (16.4 ou mais recente).
+      <div className="flex flex-col gap-4">
+        {mostrarGuiaIphone && <GuiaIphone />}
+        <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Este navegador/aparelho não suporta notificações. No iPhone, confirma que abriste a app a partir do ícone
+          no ecrã principal (não do Safari) e que o iOS está atualizado (16.4 ou mais recente).
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {estado === "desativado" ? (
-        <button
-          type="button"
-          onClick={ativar}
-          disabled={aProcessar}
-          className="w-full rounded-xl bg-brand px-4 py-3 text-center text-base font-semibold text-white active:bg-brand-dark disabled:opacity-50"
-        >
-          {aProcessar ? "A ativar…" : "Ativar lembretes"}
-        </button>
-      ) : (
-        <>
-          <div className="flex items-center justify-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-300">
-            ✓ Ativado neste aparelho
-          </div>
+    <div className="flex flex-col gap-4">
+      {mostrarGuiaIphone && <GuiaIphone />}
+      <div className="flex flex-col gap-2">
+        {estado === "desativado" ? (
           <button
             type="button"
-            onClick={testar}
+            onClick={ativar}
             disabled={aProcessar}
-            className="w-full rounded-xl bg-neutral-100 px-4 py-3 text-center text-base font-semibold text-neutral-700 active:bg-neutral-200 disabled:opacity-50"
+            className="w-full rounded-xl bg-brand px-4 py-3 text-center text-base font-semibold text-white active:bg-brand-dark disabled:opacity-50"
           >
-            {aProcessar ? "A processar…" : "Testar agora"}
+            {aProcessar ? "A ativar…" : "Ativar lembretes"}
           </button>
-          <button
-            type="button"
-            onClick={desativar}
-            disabled={aProcessar}
-            className="w-full rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700 active:bg-red-100 disabled:opacity-50"
-          >
-            Desativar neste aparelho
-          </button>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-300">
+              ✓ Ativado neste aparelho
+            </div>
+            <button
+              type="button"
+              onClick={testar}
+              disabled={aProcessar}
+              className="w-full rounded-xl bg-neutral-100 px-4 py-3 text-center text-base font-semibold text-neutral-700 active:bg-neutral-200 disabled:opacity-50"
+            >
+              {aProcessar ? "A processar…" : "Testar agora"}
+            </button>
+            <button
+              type="button"
+              onClick={desativar}
+              disabled={aProcessar}
+              className="w-full rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700 active:bg-red-100 disabled:opacity-50"
+            >
+              Desativar neste aparelho
+            </button>
+          </>
+        )}
 
-      {mensagem && <p className="rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-700">{mensagem}</p>}
+        {mensagem && <p className="rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-700">{mensagem}</p>}
+      </div>
+    </div>
+  );
+}
+
+function GuiaIphone() {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+      <p className="font-semibold text-amber-900">Antes de ativares, no iPhone</p>
+      <ol className="list-decimal space-y-1 pl-4 text-sm text-amber-800">
+        <li>Abre esta app no Safari (se ainda não a tiveres aberto assim).</li>
+        <li>
+          Toca no botão de partilhar (o quadrado com a seta para cima) e escolhe{" "}
+          <strong>&quot;Adicionar ao Ecrã Principal&quot;</strong>.
+        </li>
+        <li>Fecha o Safari e abre a app a partir do novo ícone no ecrã principal.</li>
+        <li>Só a partir daí é que o botão abaixo consegue ativar os lembretes.</li>
+      </ol>
     </div>
   );
 }
