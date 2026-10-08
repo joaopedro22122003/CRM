@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { listarClientesParaContactar } from "@/lib/data/para-contactar";
-import { listarOrcamentosSemResposta } from "@/lib/data/orcamentos-sem-resposta";
+import { listarOrcamentosSemRespostaParaAviso } from "@/lib/data/orcamentos-sem-resposta";
 import { enviarPushParaTodos } from "@/lib/data/push";
 import { mensagemAvisoDiario } from "@/lib/mensagens";
 import { autorizarCron } from "@/lib/cron-auth";
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
   const [clientes, orcamentos] = await Promise.all([
     listarClientesParaContactar(),
-    listarOrcamentosSemResposta(),
+    listarOrcamentosSemRespostaParaAviso(),
   ]);
 
   const total = clientes.length + orcamentos.length;

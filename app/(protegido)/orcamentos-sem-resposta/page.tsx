@@ -1,16 +1,31 @@
-import { formatDistanceToNowStrict } from "date-fns";
-import { pt } from "date-fns/locale";
+import Link from "next/link";
 import { PageHeader, Cartao, Badge, EstadoVazio } from "@/components/ui";
 import { listarOrcamentosSemResposta } from "@/lib/data/orcamentos-sem-resposta";
 import BotaoEnviarMensagem from "./BotaoEnviarMensagem";
 import BotaoDarComoPerdido from "./BotaoDarComoPerdido";
+
+function rotuloDias(dias: number): string {
+  if (dias <= 0) return "hoje";
+  return dias === 1 ? "há 1 dia" : `há ${dias} dias`;
+}
 
 export default async function OrcamentosSemRespostaPage() {
   const orcamentos = await listarOrcamentosSemResposta();
 
   return (
     <>
-      <PageHeader titulo="Orçamentos sem resposta" voltarPara="/mais" />
+      <PageHeader
+        titulo="Orçamentos sem resposta"
+        voltarPara="/mais"
+        acao={
+          <Link
+            href="/pedido-rapido"
+            className="rounded-full bg-brand px-3.5 py-1.5 text-sm font-semibold text-white active:bg-brand-dark"
+          >
+            Registar
+          </Link>
+        }
+      />
 
       <div className="flex flex-col gap-3 p-4">
         {orcamentos.length === 0 ? (
@@ -26,11 +41,7 @@ export default async function OrcamentosSemRespostaPage() {
                       <div>
                         <p className="font-semibold text-neutral-900">{o.cliente.nome}</p>
                         <p className="text-sm text-neutral-500">
-                          {carro ?? "Sem viatura"} · pedido{" "}
-                          {formatDistanceToNowStrict(new Date(`${o.dataReferencia}T00:00:00`), {
-                            locale: pt,
-                            addSuffix: true,
-                          })}
+                          {carro ?? "Sem viatura"} · pedido {rotuloDias(o.dias)}
                         </p>
                       </div>
                       {o.pacote && <Badge cor="azul">{o.pacote}</Badge>}

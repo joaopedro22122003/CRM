@@ -9,7 +9,7 @@ export default async function ParaContactarPage() {
 
   return (
     <>
-      <PageHeader titulo="Para contactar" voltarPara="/mais" />
+      <PageHeader titulo="Para contactar (manutenção)" voltarPara="/mais" />
 
       <div className="flex flex-col gap-3 p-4">
         {clientes.length === 0 ? (

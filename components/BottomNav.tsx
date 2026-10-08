@@ -104,7 +104,7 @@ export default function BottomNav() {
                 onClick={() => setAberto(false)}
                 className="rounded-xl bg-neutral-200 px-4 py-3 text-center text-base font-semibold text-neutral-900 active:bg-neutral-300"
               >
-                Pediu preço (registo rápido)
+                Orçamento sem resposta
               </Link>
             </div>
             <button

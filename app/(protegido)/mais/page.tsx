@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader, Cartao, Badge } from "@/components/ui";
 import { listarClientesParaContactar } from "@/lib/data/para-contactar";
-import { listarOrcamentosSemResposta } from "@/lib/data/orcamentos-sem-resposta";
+import { listarOrcamentosSemRespostaParaAviso } from "@/lib/data/orcamentos-sem-resposta";
 import { sairAction } from "./actions";
 
 const LIGACOES = [
@@ -13,7 +13,7 @@ const LIGACOES = [
 export default async function MaisPage() {
   const [paraContactar, orcamentosSemResposta] = await Promise.all([
     listarClientesParaContactar(),
-    listarOrcamentosSemResposta(),
+    listarOrcamentosSemRespostaParaAviso(),
   ]);
 
   return (
@@ -27,7 +27,7 @@ export default async function MaisPage() {
             }`}
           >
             <div>
-              <p className="font-semibold text-neutral-900">Para contactar</p>
+              <p className="font-semibold text-neutral-900">Para contactar (manutenção)</p>
               <p className="text-sm text-neutral-500">Clientes para reativar</p>
             </div>
             {paraContactar.length > 0 && <Badge cor="marca">{paraContactar.length}</Badge>}

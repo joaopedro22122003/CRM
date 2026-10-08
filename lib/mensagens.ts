@@ -31,7 +31,11 @@ export function mensagemOrcamentoSemResposta(nome: string, carro: string | null)
 export function mensagemAvisoDiario(paraContactar: number, semResposta: number): string {
   const partes: string[] = [];
   if (paraContactar > 0) {
-    partes.push(paraContactar === 1 ? "1 cliente para contactar" : `${paraContactar} clientes para contactar`);
+    partes.push(
+      paraContactar === 1
+        ? "1 cliente para contactar (manutenção)"
+        : `${paraContactar} clientes para contactar (manutenção)`
+    );
   }
   if (semResposta > 0) {
     partes.push(semResposta === 1 ? "1 orçamento sem resposta" : `${semResposta} orçamentos sem resposta`);
