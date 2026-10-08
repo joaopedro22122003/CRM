@@ -1,6 +1,6 @@
 import "server-only";
 import { criarClienteSupabase } from "@/lib/supabase/server";
-import type { Cliente, EstadoMarcacao, Marcacao, Pedido, TipoMarcacao, Viatura } from "@/lib/types";
+import type { Cliente, Marcacao, Pedido, TipoMarcacao, Viatura } from "@/lib/types";
 
 export interface MarcacaoResumo extends Marcacao {
   pedido: Pick<Pedido, "id"> & {
@@ -85,12 +85,6 @@ export async function criarMarcacao(dados: DadosMarcacao): Promise<Marcacao> {
     .in("estado", ["novo", "qualificado", "orcamentado"]);
 
   return data;
-}
-
-export async function atualizarEstadoMarcacao(id: string, estado: EstadoMarcacao): Promise<void> {
-  const supabase = criarClienteSupabase();
-  const { error } = await supabase.from("marcacoes").update({ estado }).eq("id", id);
-  if (error) throw error;
 }
 
 /** Apaga só esta marcação (usado ao cancelar uma marcação de um cliente

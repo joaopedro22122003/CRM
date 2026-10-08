@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader, Cartao, Badge } from "@/components/ui";
 import { listarClientesParaContactar } from "@/lib/data/para-contactar";
+import { listarOrcamentosSemResposta } from "@/lib/data/orcamentos-sem-resposta";
 import { sairAction } from "./actions";
 
 const LIGACOES = [
@@ -10,7 +11,10 @@ const LIGACOES = [
 ];
 
 export default async function MaisPage() {
-  const paraContactar = await listarClientesParaContactar();
+  const [paraContactar, orcamentosSemResposta] = await Promise.all([
+    listarClientesParaContactar(),
+    listarOrcamentosSemResposta(),
+  ]);
 
   return (
     <>
@@ -27,6 +31,20 @@ export default async function MaisPage() {
               <p className="text-sm text-neutral-500">Clientes para reativar</p>
             </div>
             {paraContactar.length > 0 && <Badge cor="marca">{paraContactar.length}</Badge>}
+          </Cartao>
+        </Link>
+
+        <Link href="/orcamentos-sem-resposta">
+          <Cartao
+            className={`flex items-center justify-between active:bg-neutral-50 ${
+              orcamentosSemResposta.length > 0 ? "border-brand bg-brand-50" : ""
+            }`}
+          >
+            <div>
+              <p className="font-semibold text-neutral-900">Orçamentos sem resposta</p>
+              <p className="text-sm text-neutral-500">Pediram preço e ainda não marcaram</p>
+            </div>
+            {orcamentosSemResposta.length > 0 && <Badge cor="marca">{orcamentosSemResposta.length}</Badge>}
           </Cartao>
         </Link>
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { listarClientesParaContactar } from "@/lib/data/para-contactar";
+import { listarOrcamentosSemResposta } from "@/lib/data/orcamentos-sem-resposta";
 import { enviarPushParaTodos } from "@/lib/data/push";
-import { mensagemParaContactar } from "@/lib/mensagens";
+import { mensagemAvisoDiario } from "@/lib/mensagens";
 import { autorizarCron } from "@/lib/cron-auth";
 
 // Chamado uma vez por dia pela Vercel (ver vercel.json). Nunca deve
@@ -23,17 +24,35 @@ export async function GET(request: Request) {
     return NextResponse.json({ teste: true, ...resultado });
   }
 
-  const clientes = await listarClientesParaContactar();
+  const [clientes, orcamentos] = await Promise.all([
+    listarClientesParaContactar(),
+    listarOrcamentosSemResposta(),
+  ]);
 
-  if (clientes.length === 0) {
-    return NextResponse.json({ enviado: false, total: 0 });
+  const total = clientes.length + orcamentos.length;
+  if (total === 0) {
+    return NextResponse.json({ enviado: false, paraContactar: 0, semResposta: 0 });
   }
+
+  // Se só um dos dois ecrãs tiver itens, a notificação abre logo esse
+  // ecrã; com os dois, abre "Para contactar" (o mais antigo dos dois).
+  const url_ =
+    clientes.length > 0 && orcamentos.length === 0
+      ? "/para-contactar"
+      : orcamentos.length > 0 && clientes.length === 0
+        ? "/orcamentos-sem-resposta"
+        : "/para-contactar";
 
   const resultado = await enviarPushParaTodos({
     titulo: "Garagem do Jota",
-    corpo: mensagemParaContactar(clientes.length),
-    url: "/para-contactar",
+    corpo: mensagemAvisoDiario(clientes.length, orcamentos.length),
+    url: url_,
   });
 
-  return NextResponse.json({ enviado: true, total: clientes.length, ...resultado });
+  return NextResponse.json({
+    enviado: true,
+    paraContactar: clientes.length,
+    semResposta: orcamentos.length,
+    ...resultado,
+  });
 }

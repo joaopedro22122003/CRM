@@ -1,5 +1,6 @@
 import "server-only";
 import { criarClienteSupabase } from "@/lib/supabase/server";
+import { normalizarTelefone } from "@/lib/whatsapp";
 import type { Cliente, Servico, Viatura } from "@/lib/types";
 
 export async function listarClientes(pesquisa?: string): Promise<Cliente[]> {
@@ -74,6 +75,17 @@ export interface DadosCliente {
   telefone: string;
   fonte: Cliente["fonte"];
   notas: string | null;
+}
+
+/** Procura um cliente já existente com o mesmo telemóvel, comparando
+ * de forma normalizada (9 dígitos, 351... ou 00351... contam como o
+ * mesmo número) — usado para nunca criar um cliente duplicado a
+ * partir do mesmo contacto. */
+export async function obterClientePorTelefone(telefone: string): Promise<Cliente | null> {
+  const alvo = normalizarTelefone(telefone);
+  if (!alvo) return null;
+  const clientes = await listarClientes();
+  return clientes.find((c) => normalizarTelefone(c.telefone) === alvo) ?? null;
 }
 
 export async function criarCliente(dados: DadosCliente): Promise<Cliente> {

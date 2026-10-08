@@ -65,6 +65,9 @@ export interface Pedido {
   viatura_id: string | null;
   estado: EstadoPedido;
   resumo_problema: string | null;
+  /** Data do único seguimento feito a um orçamento sem resposta (ver
+   * "Orçamentos sem resposta") — null enquanto ainda não foi seguido. */
+  seguimento_em: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -83,13 +86,6 @@ export interface Orcamento {
   preco_entrada: number;
   notas_variacao: string | null;
   created_at: string;
-}
-
-export interface OrcamentoExtra {
-  id: string;
-  orcamento_id: string;
-  descricao: string;
-  preco: number;
 }
 
 export interface ExtraCatalogo {

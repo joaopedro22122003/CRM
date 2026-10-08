@@ -163,6 +163,18 @@ export async function atualizarEstadoPedido(id: string, estado: EstadoPedido): P
   if (error) throw error;
 }
 
+/** Regista que foi feito o (único) seguimento a um orçamento sem
+ * resposta — para o pedido sair da lista e nunca voltar a ser
+ * incomodado por este motivo. Nunca apaga nada. */
+export async function marcarPedidoSeguido(id: string): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("pedidos")
+    .update({ seguimento_em: new Date().toISOString().slice(0, 10) })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function associarViaturaAoPedido(id: string, viaturaId: string): Promise<void> {
   const supabase = criarClienteSupabase();
   const { error } = await supabase
