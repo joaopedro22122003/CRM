@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { listarMarcacoesEntre } from "@/lib/data/marcacoes";
 import { limitesDeAmanhaEmLisboa } from "@/lib/fuso-horario";
 import { enviarPushParaTodos } from "@/lib/data/push";
+import { autorizarCron } from "@/lib/cron-auth";
 
 // Chamado uma vez por dia pela Vercel (ver vercel.json). Nunca deve
 // ser pré-gerado nem guardado em cache.
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const autorizacao = request.headers.get("authorization");
-  if (!process.env.CRON_SECRET || autorizacao !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!autorizarCron(request)) {
     return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
   }
 

@@ -10,3 +10,8 @@ export function mensagemLembreteManutencao(nome: string, carro: string): string 
 export function mensagemConfirmacaoMarcacao(nome: string, horaTexto: string): string {
   return `Olá ${nome}! Só a confirmar a tua marcação amanhã às ${horaTexto} na Garagem do Jota. Até lá! 🚗`;
 }
+
+/** Corpo da notificação diária de "Para contactar", com singular/plural correto. */
+export function mensagemParaContactar(quantidade: number): string {
+  return quantidade === 1 ? "Tens 1 cliente para contactar." : `Tens ${quantidade} clientes para contactar.`;
+}

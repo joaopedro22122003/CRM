@@ -102,6 +102,29 @@ botão para abrir o WhatsApp com a mensagem de confirmação escrita.
    sozinho a notificação real todos os dias às 18h, sempre que houver
    marcações no dia seguinte.
 
+## Parte 5 — Aviso diário de "Para contactar"
+
+Além do lembrete da véspera (Parte 4), há uma segunda notificação
+diária, independente: todos os dias por volta das 9h (hora de
+Portugal), se houver clientes na lista "Para contactar", chega uma
+notificação a dizer quantos são. Ao tocar, abre diretamente essa
+lista. Se não houver nenhum cliente nesse dia, não chega notificação
+nenhuma. Usa as mesmas variáveis e o mesmo `CRON_SECRET` da Parte 4 —
+não há nada novo a configurar.
+
+Para testares sem esperar pelas 9h (e sem depender de haver clientes
+reais na lista nesse momento), abre este link no Safari do telemóvel —
+já tem o segredo incluído, por isso convém guardá-lo só nas tuas
+Notas, sem o partilhares:
+
+```
+https://crm-nine-mu-13.vercel.app/api/cron/lembrete-para-contactar?segredo=33637ee10f5117cc92bbcf390f19dec79fb66e781e670efc&teste=1
+```
+
+Isto manda sempre uma notificação de teste. Se chegar, está tudo a
+funcionar — a partir daí recebes sozinho o aviso real todos os dias,
+só nos dias em que houver mesmo clientes por contactar.
+
 ---
 
 ## Como mudar preços mais tarde
@@ -133,7 +156,10 @@ automaticamente a seguir a guardares).
   contas de utilizador — ver `middleware.ts` e `lib/auth.ts`.
 - Fotos de antes/depois ficam no Supabase Storage, no balde
   `fotos-servicos`.
-- Lembretes da véspera: `app/api/cron/lembrete-vespera/route.ts`
-  (chamado 1x/dia pela Vercel, ver `vercel.json`) + `lib/data/push.ts`
-  (envio via `web-push`) + `public/sw.js` (Service Worker no
-  telemóvel).
+- Notificações push: `app/api/cron/lembrete-vespera/route.ts` (18h,
+  marcações de amanhã) e `app/api/cron/lembrete-para-contactar/route.ts`
+  (9h, clientes para reativar) — dois crons independentes (ver
+  `vercel.json`), ambos protegidos por `lib/cron-auth.ts` (mesmo
+  `CRON_SECRET`, aceite por cabeçalho ou por `?segredo=` na URL) +
+  `lib/data/push.ts` (envio via `web-push`) + `public/sw.js` (Service
+  Worker no telemóvel).

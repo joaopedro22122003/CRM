@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/lembrete-vespera",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/lembrete-para-contactar",
+      "schedule": "0 9 * * *"
     }
   ]
 }
