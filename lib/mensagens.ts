@@ -3,7 +3,7 @@
 
 /** Mensagem de lembrete de manutenção, usada em "Para contactar". */
 export function mensagemLembreteManutencao(nome: string, carro: string): string {
-  return `Boas ${nome}, tudo bem? 👍 Já passou um mês desde que tratámos do ${carro}. Se quiseres, posso dar-lhe uma manutenção para manter o resultado. Queres que veja datas livres?`;
+  return `Boas ${nome}, tudo bem? 👍 Já passou um mês desde que tratámos do ${carro}. Se quiseres, posso dar-lhe uma revisão para manter o resultado. Queres que veja datas livres?`;
 }
 
 /** Mensagem de confirmação da véspera, usada no lembrete das marcações de amanhã. */
