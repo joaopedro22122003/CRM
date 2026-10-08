@@ -4,15 +4,15 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import { mensagemOrcamentoSemResposta } from "@/lib/mensagens";
-import { marcarPedidoSeguidoAction } from "./actions";
+import { marcarSeguimentoAction } from "./actions";
 
 export default function BotaoEnviarMensagem({
-  pedidoId,
+  id,
   telefone,
   nome,
   carro,
 }: {
-  pedidoId: string;
+  id: string;
   telefone: string;
   nome: string;
   carro: string | null;
@@ -24,7 +24,7 @@ export default function BotaoEnviarMensagem({
 
   function aoClicar() {
     iniciarTransicao(async () => {
-      await marcarPedidoSeguidoAction(pedidoId);
+      await marcarSeguimentoAction(id);
       router.refresh();
     });
   }
@@ -35,7 +35,7 @@ export default function BotaoEnviarMensagem({
       target="_blank"
       rel="noopener noreferrer"
       onClick={aoClicar}
-      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white active:bg-green-700"
+      className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white active:bg-green-700"
     >
       Enviar mensagem
     </a>

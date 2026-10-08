@@ -1,87 +1,98 @@
 import "server-only";
 import { differenceInCalendarDays } from "date-fns";
 import { criarClienteSupabase } from "@/lib/supabase/server";
-import { ROTULOS_PACOTE } from "@/lib/types";
-import type { Cliente, Pacote, Viatura } from "@/lib/types";
 
 /** A partir de quantos dias sem seguimento é que vale a pena incomodar
  * (aviso das 9h e contador em "Mais") — a lista em si mostra todos,
  * sem este corte. */
 const DIAS_MINIMOS_PARA_AVISO = 3;
 
-export interface OrcamentoSemResposta {
-  pedidoId: string;
-  cliente: Pick<Cliente, "id" | "nome" | "telefone">;
-  viatura: Pick<Viatura, "marca" | "modelo"> | null;
+export interface RegistoOrcamentoSemResposta {
+  id: string;
+  nome: string;
+  telefone: string;
+  carro: string | null;
   pacote: string | null;
-  dataReferencia: string;
-  /** Dias desde a data de referência (0 = hoje). */
+  criadoEm: string;
+  /** Dias desde o registo (0 = hoje). */
   dias: number;
 }
 
-/** Base partilhada: todos os pedidos em estado "orçamentado", ainda
- * sem seguimento (um pedido sai sozinho de "orçamentado" assim que
- * leva uma marcação — ver lib/data/marcacoes.ts, criarMarcacao — e
- * "perdido" sai de vez do estado "orçamentado"). A "data de
- * referência" (para contar os dias) é a do orçamento mais recente
- * quando existe um, ou a do próprio pedido quando nenhum pacote
- * chegou a ser escolhido. Do mais antigo para o mais recente. */
-async function buscarOrcamentosSemRespostaBase(): Promise<OrcamentoSemResposta[]> {
+/** Base partilhada: todos os registos ainda ativos e sem seguimento,
+ * do mais antigo para o mais recente. */
+async function buscarAtivosSemSeguimento(): Promise<RegistoOrcamentoSemResposta[]> {
   const supabase = criarClienteSupabase();
-
-  const { data: pedidos, error: erroPedidos } = await supabase
-    .from("pedidos")
-    .select("id, created_at, cliente:clientes(id, nome, telefone), viatura:viaturas(marca, modelo)")
-    .eq("estado", "orcamentado")
-    .is("seguimento_em", null);
-  if (erroPedidos) throw erroPedidos;
-  if (!pedidos || pedidos.length === 0) return [];
-
-  const ids = pedidos.map((p) => p.id);
-  const { data: orcamentos, error: erroOrc } = await supabase
-    .from("orcamentos")
-    .select("pedido_id, pacote, created_at")
-    .in("pedido_id", ids)
-    .order("created_at", { ascending: false });
-  if (erroOrc) throw erroOrc;
-
-  const mapaOrcamento = new Map<string, { pacote: Pacote; created_at: string }>();
-  for (const o of orcamentos ?? []) {
-    if (!mapaOrcamento.has(o.pedido_id)) {
-      mapaOrcamento.set(o.pedido_id, { pacote: o.pacote as Pacote, created_at: o.created_at });
-    }
-  }
+  const { data, error } = await supabase
+    .from("orcamentos_sem_resposta")
+    .select("id, nome, telefone, carro, pacote, criado_em")
+    .eq("estado", "ativo")
+    .is("seguimento_em", null)
+    .order("criado_em", { ascending: true });
+  if (error) throw error;
 
   const hoje = new Date();
-  const resultado: OrcamentoSemResposta[] = pedidos.map((p) => {
-    const orcamento = mapaOrcamento.get(p.id) ?? null;
-    const dataReferencia = orcamento?.created_at ?? p.created_at;
-    const dias = differenceInCalendarDays(hoje, new Date(dataReferencia));
-
-    return {
-      pedidoId: p.id,
-      cliente: p.cliente as unknown as Pick<Cliente, "id" | "nome" | "telefone">,
-      viatura: (p.viatura as unknown as Pick<Viatura, "marca" | "modelo"> | null) ?? null,
-      pacote: orcamento ? (ROTULOS_PACOTE[orcamento.pacote] ?? orcamento.pacote) : null,
-      dataReferencia,
-      dias,
-    };
-  });
-
-  resultado.sort((a, b) => (a.dataReferencia < b.dataReferencia ? -1 : 1));
-
-  return resultado;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    nome: r.nome,
+    telefone: r.telefone,
+    carro: r.carro,
+    pacote: r.pacote,
+    criadoEm: r.criado_em,
+    dias: differenceInCalendarDays(hoje, new Date(`${r.criado_em}T00:00:00`)),
+  }));
 }
 
-/** Todos os orçamentos sem resposta, desde o momento do registo — usado
- * pelo ecrã "Orçamentos sem resposta". */
-export async function listarOrcamentosSemResposta(): Promise<OrcamentoSemResposta[]> {
-  return buscarOrcamentosSemRespostaBase();
+/** Todos os registos ativos e sem seguimento, desde o momento do
+ * registo — usado pelo ecrã "Orçamentos sem resposta". */
+export async function listarOrcamentosSemResposta(): Promise<RegistoOrcamentoSemResposta[]> {
+  return buscarAtivosSemSeguimento();
 }
 
-/** Só os orçamentos sem resposta há 3 dias ou mais — usado pelo aviso
- * das 9h e pelo contador em "Mais", para os dois baterem sempre certo. */
-export async function listarOrcamentosSemRespostaParaAviso(): Promise<OrcamentoSemResposta[]> {
-  const todos = await buscarOrcamentosSemRespostaBase();
-  return todos.filter((o) => o.dias >= DIAS_MINIMOS_PARA_AVISO);
+/** Só os que têm 3 dias ou mais — usado pelo aviso das 9h e pelo
+ * contador em "Mais", para os dois baterem sempre certo. */
+export async function listarOrcamentosSemRespostaParaAviso(): Promise<RegistoOrcamentoSemResposta[]> {
+  const todos = await buscarAtivosSemSeguimento();
+  return todos.filter((r) => r.dias >= DIAS_MINIMOS_PARA_AVISO);
+}
+
+export interface DadosRegistoOrcamentoSemResposta {
+  nome: string;
+  telefone: string;
+  carro: string | null;
+  pacote: string | null;
+}
+
+/** Cria um registo novo — usado pelo formulário "Orçamento sem
+ * resposta". Não mexe em clientes, viaturas, pedidos nem orçamentos. */
+export async function criarRegistoOrcamentoSemResposta(
+  dados: DadosRegistoOrcamentoSemResposta
+): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase.from("orcamentos_sem_resposta").insert(dados);
+  if (error) throw error;
+}
+
+/** Regista o (único) seguimento feito — o registo sai da lista e nunca
+ * volta a aparecer por este motivo. Nunca apaga nada. */
+export async function marcarSeguimentoOrcamentoSemResposta(id: string): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("orcamentos_sem_resposta")
+    .update({ seguimento_em: new Date().toISOString().slice(0, 10) })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+/** Muda o estado para "marcou" ou "perdido" — só muda o estado, nunca
+ * apaga o registo (fica disponível para as Estatísticas). */
+export async function atualizarEstadoOrcamentoSemResposta(
+  id: string,
+  estado: "marcou" | "perdido"
+): Promise<void> {
+  const supabase = criarClienteSupabase();
+  const { error } = await supabase
+    .from("orcamentos_sem_resposta")
+    .update({ estado, resolvido_em: new Date().toISOString().slice(0, 10) })
+    .eq("id", id);
+  if (error) throw error;
 }

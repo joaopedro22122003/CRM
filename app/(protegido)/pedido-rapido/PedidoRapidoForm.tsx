@@ -45,8 +45,8 @@ export default function PedidoRapidoForm() {
         <Input name="nome" required placeholder="Ex.: João Silva" />
       </Campo>
 
-      <Campo label="Carro">
-        <Input name="carro" required placeholder="Ex.: Golf 7" />
+      <Campo label="Carro (opcional)">
+        <Input name="carro" placeholder="Ex.: Golf 7" />
       </Campo>
 
       <Campo label="Pacote (opcional)">

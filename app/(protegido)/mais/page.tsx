@@ -8,6 +8,7 @@ const LIGACOES = [
   { href: "/servicos", titulo: "Serviços", descricao: "Histórico de serviços registados" },
   { href: "/faturacao", titulo: "Faturação", descricao: "Pagamentos por receber e histórico" },
   { href: "/despesas", titulo: "Despesas", descricao: "Aponta o que gastas no negócio" },
+  { href: "/estatisticas", titulo: "Estatísticas", descricao: "Orçamentos registados e taxa de conversão" },
 ];
 
 export default async function MaisPage() {

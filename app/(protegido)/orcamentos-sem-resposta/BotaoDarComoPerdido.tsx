@@ -3,16 +3,16 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import ModalConfirmacao from "@/components/ModalConfirmacao";
-import { marcarPedidoPerdidoAction } from "./actions";
+import { marcarPerdidoAction } from "./actions";
 
-export default function BotaoDarComoPerdido({ pedidoId }: { pedidoId: string }) {
+export default function BotaoDarComoPerdido({ id }: { id: string }) {
   const router = useRouter();
   const [aberto, setAberto] = useState(false);
   const [aGuardar, iniciarTransicao] = useTransition();
 
   function confirmar() {
     iniciarTransicao(async () => {
-      await marcarPedidoPerdidoAction(pedidoId);
+      await marcarPerdidoAction(id);
       setAberto(false);
       router.refresh();
     });
@@ -31,7 +31,7 @@ export default function BotaoDarComoPerdido({ pedidoId }: { pedidoId: string }) 
       {aberto && (
         <ModalConfirmacao
           titulo="Dar este orçamento como perdido?"
-          mensagem="Sai desta lista e não volta a aparecer. Não apaga o cliente nem o histórico."
+          mensagem="Sai desta lista e não volta a aparecer. Fica guardado nas Estatísticas, não apaga nada."
           textoConfirmar="Dar como perdido"
           aProcessar={aGuardar}
           onConfirmar={confirmar}

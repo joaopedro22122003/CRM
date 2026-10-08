@@ -1,24 +1,31 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { marcarPedidoSeguido, atualizarEstadoPedido } from "@/lib/data/pedidos";
+import {
+  marcarSeguimentoOrcamentoSemResposta,
+  atualizarEstadoOrcamentoSemResposta,
+} from "@/lib/data/orcamentos-sem-resposta";
 
 function revalidarTudo() {
   revalidatePath("/orcamentos-sem-resposta");
   revalidatePath("/mais");
-  revalidatePath("/pedidos");
+  revalidatePath("/estatisticas");
 }
 
-export async function marcarPedidoSeguidoAction(pedidoId: string): Promise<void> {
-  if (!pedidoId) return;
-  await marcarPedidoSeguido(pedidoId);
+export async function marcarSeguimentoAction(id: string): Promise<void> {
+  if (!id) return;
+  await marcarSeguimentoOrcamentoSemResposta(id);
   revalidarTudo();
 }
 
-/** Reaproveita o estado "perdido" que já existe em EstadoPedido (já
- * usado noutros sítios da app) — não precisa de nenhuma coluna nova. */
-export async function marcarPedidoPerdidoAction(pedidoId: string): Promise<void> {
-  if (!pedidoId) return;
-  await atualizarEstadoPedido(pedidoId, "perdido");
+export async function marcarJaMarcouAction(id: string): Promise<void> {
+  if (!id) return;
+  await atualizarEstadoOrcamentoSemResposta(id, "marcou");
+  revalidarTudo();
+}
+
+export async function marcarPerdidoAction(id: string): Promise<void> {
+  if (!id) return;
+  await atualizarEstadoOrcamentoSemResposta(id, "perdido");
   revalidarTudo();
 }
